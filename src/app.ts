@@ -12,43 +12,50 @@ import asistenciaRoutes from "./routes/asistencia.routes";
 
 const app = express();
 
-// 🔥 IMPORTANTE: permite múltiples orígenes (local + producción)
 const allowedOrigins = [
+  "https://grupocolchaguarrhh.netlify.app",
   "http://localhost:5173",
   "http://localhost:3000",
-  "https://grupocolchaguarrhh.netlify.app",
 ];
 
-const corsOptions: cors.CorsOptions = {
-  origin: (origin, callback) => {
-    // permitir requests sin origin (Postman, curl, etc.)
-    if (!origin) return callback(null, true);
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
 
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("No permitido por CORS"));
-    }
-  },
-  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true,
-};
+  if (origin && allowedOrigins.includes(origin)) {
+    res.header("Access-Control-Allow-Origin", origin);
+  }
 
-// ✅ CORS antes de todo
-app.use(cors(corsOptions));
+  res.header("Vary", "Origin");
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header(
+    "Access-Control-Allow-Methods",
+    "GET,POST,PUT,PATCH,DELETE,OPTIONS"
+  );
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization"
+  );
 
-// 🔥 CLAVE: manejar preflight explícitamente
-app.options("*", cors(corsOptions));
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(204);
+  }
+
+  next();
+});
+
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+  })
+);
 
 app.use(express.json());
 
-// test endpoint
 app.get("/", (_req, res) => {
   res.json({ message: "API Grupo Colchagua funcionando" });
 });
 
-// rutas
 app.use("/api/auth", authRoutes);
 app.use("/api/empresas", empresaRoutes);
 app.use("/api/cargos", cargoRoutes);
