@@ -12,37 +12,55 @@ import asistenciaRoutes from "./routes/asistencia.routes";
 
 const app = express();
 
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
+const allowedOrigins = [
+  "https://grupocolchaguarrhh.netlify.app",
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "http://localhost:3000",
+];
 
-  console.log("REQ:", req.method, req.path, "ORIGIN:", origin);
+const corsOptions: cors.CorsOptions = {
+  origin: (origin, callback) => {
+    console.log("[CORS] incoming origin =", origin);
 
-  res.header("Access-Control-Allow-Origin", origin || "*");
-  res.header("Vary", "Origin");
-  res.header("Access-Control-Allow-Credentials", "true");
-  res.header("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+    if (!origin) {
+      return callback(null, true);
+    }
 
-  if (req.method === "OPTIONS") {
-    return res.status(204).send();
-  }
+    const cleanOrigin = origin.trim().replace(/\/+$/, "");
 
-  next();
-});
+    if (allowedOrigins.includes(cleanOrigin)) {
+      return callback(null, true);
+    }
 
-app.use(cors({
-  origin: true,
+    console.warn("[CORS] blocked origin =", origin);
+    return callback(null, false);
+  },
   credentials: true,
-}));
+  methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE", "OPTIONS"],
+  allowedHeaders: [
+    "Content-Type",
+    "Authorization",
+    "X-Requested-With",
+    "Cache-Control",
+    "Pragma",
+    "Expires",
+  ],
+  optionsSuccessStatus: 204,
+};
 
-app.use(express.json());
+app.use(cors(corsOptions));
+app.options(/.*/, cors(corsOptions));
+
+app.use(express.json({ limit: "60mb" }));
+app.use(express.urlencoded({ extended: true, limit: "60mb" }));
 
 app.get("/", (_req, res) => {
   res.json({ message: "API Grupo Colchagua funcionando" });
 });
 
-app.get("/api/test-cors", (_req, res) => {
-  res.json({ ok: true, message: "CORS OK" });
+app.get("/health", (_req, res) => {
+  res.status(200).send("ok");
 });
 
 app.use("/api/auth", authRoutes);
@@ -53,5 +71,12 @@ app.use("/api/sucursales", sucursalRoutes);
 app.use("/api/trabajadores", trabajadorRoutes);
 app.use("/api/asignaciones", asignacionRoutes);
 app.use("/api/asistencia", asistenciaRoutes);
+
+app.use((_req, res) => {
+  res.status(404).json({
+    ok: false,
+    error: "Not Found",
+  });
+});
 
 export default app;
