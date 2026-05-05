@@ -9,5 +9,12 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "verbatimModuleSyntax": false
-  }
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "prisma",
+    "prisma.config.ts",
+    "generated"
+  ]
 }

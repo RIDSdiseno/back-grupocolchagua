@@ -1,0 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const tarifa_controller_1 = require("../controllers/tarifa.controller");
+const auth_middleware_1 = require("../middlewares/auth.middleware");
+const router = (0, express_1.Router)();
+router.get("/empresa/:empresaId", auth_middleware_1.verificarToken, tarifa_controller_1.listarTarifasPorEmpresa);
+router.post("/empresa/:empresaId", auth_middleware_1.verificarToken, tarifa_controller_1.crearTarifaEmpresa);
+router.put("/:id", auth_middleware_1.verificarToken, tarifa_controller_1.actualizarTarifa);
+router.delete("/:id", auth_middleware_1.verificarToken, tarifa_controller_1.eliminarTarifa);
+exports.default = router;
