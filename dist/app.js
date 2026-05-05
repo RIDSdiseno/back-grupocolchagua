@@ -14,7 +14,13 @@ const trabajador_routes_1 = __importDefault(require("./routes/trabajador.routes"
 const asignacion_routes_1 = __importDefault(require("./routes/asignacion.routes"));
 const asistencia_routes_1 = __importDefault(require("./routes/asistencia.routes"));
 const app = (0, express_1.default)();
-app.use((0, cors_1.default)());
+const corsOptions = {
+    origin: "https://grupocolchaguarrhh.netlify.app",
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+};
+app.use((0, cors_1.default)(corsOptions));
 app.use(express_1.default.json());
 app.get("/", (_req, res) => {
     res.json({ message: "API Grupo Colchagua funcionando" });
