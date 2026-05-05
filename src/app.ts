@@ -11,12 +11,15 @@ import asistenciaRoutes from "./routes/asistencia.routes";
 
 const app = express();
 
-app.use(cors({
+const corsOptions = {
   origin: "https://grupocolchaguarrhh.netlify.app",
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
-}));
+};
+
+app.options("*", cors(corsOptions));
+app.use(cors(corsOptions));
 app.use(express.json());
 
 app.get("/", (_req, res) => {
