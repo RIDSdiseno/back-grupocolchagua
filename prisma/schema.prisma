@@ -8,117 +8,106 @@ datasource db {
 }
 
 model Asignacion {
-  id            Int       @id @default(autoincrement())
+  id           Int        @id @default(autoincrement())
   trabajadorId Int
   empresaId    Int
   sucursalId   Int?
   cargoId      Int
   fechaInicio  DateTime
   fechaFin     DateTime?
-
-  Cargo      Cargo      @relation(fields: [cargoId], references: [id])
-  Empresa    Empresa    @relation(fields: [empresaId], references: [id])
-  Sucursal   Sucursal?  @relation(fields: [sucursalId], references: [id])
-  Trabajador Trabajador @relation(fields: [trabajadorId], references: [id])
+  Cargo        Cargo      @relation(fields: [cargoId], references: [id])
+  Empresa      Empresa    @relation(fields: [empresaId], references: [id])
+  Sucursal     Sucursal?  @relation(fields: [sucursalId], references: [id])
+  Trabajador   Trabajador @relation(fields: [trabajadorId], references: [id])
 }
 
 model Asistencia {
-  id           Int      @id @default(autoincrement())
+  id           Int        @id @default(autoincrement())
   trabajadorId Int
   fecha        DateTime
-  estado       String   @default("A")
-  horasExtras  Float    @default(0)
-  turno        String   @default("diurno")
   cargoId      Int
   empresaId    Int
   sucursalId   Int?
   observacion  String?
-
-  Cargo      Cargo      @relation(fields: [cargoId], references: [id])
-  Empresa    Empresa    @relation(fields: [empresaId], references: [id])
-  Sucursal   Sucursal?  @relation(fields: [sucursalId], references: [id])
-  Trabajador Trabajador @relation(fields: [trabajadorId], references: [id])
+  estado       String     @default("A")
+  horasExtras  Float      @default(0)
+  turno        String     @default("diurno")
+  Cargo        Cargo      @relation(fields: [cargoId], references: [id])
+  Empresa      Empresa    @relation(fields: [empresaId], references: [id])
+  Sucursal     Sucursal?  @relation(fields: [sucursalId], references: [id])
+  Trabajador   Trabajador @relation(fields: [trabajadorId], references: [id])
 
   @@unique([trabajadorId, fecha, empresaId])
 }
 
 model Cargo {
-  id     Int    @id @default(autoincrement())
-  nombre String @unique
-
+  id         Int          @id @default(autoincrement())
+  nombre     String       @unique
   Asignacion Asignacion[]
   Asistencia Asistencia[]
   Tarifa     Tarifa[]
 }
 
 model Empresa {
-  id           Int     @id @default(autoincrement())
-  nombre       String
-  rut          String? @unique
-  logoPublicId String?
-  logoUrl      String?
-  razonSocial  String?
-
+  id                Int          @id @default(autoincrement())
+  nombre            String
+  rut               String?      @unique
+  logoPublicId      String?
+  logoUrl           String?
+  razonSocial       String?
   encargadoNombre   String?
   encargadoCorreo   String?
   encargadoTelefono String?
-
-  Sucursal   Sucursal[]
-  Asignacion Asignacion[]
-  Asistencia Asistencia[]
-  Tarifa     Tarifa[]
+  Asignacion        Asignacion[]
+  Asistencia        Asistencia[]
+  Sucursal          Sucursal[]
+  Tarifa            Tarifa[]
 }
 
 model Sucursal {
-  id        Int     @id @default(autoincrement())
-  nombre    String
-  direccion String?
-  comuna    String?
-  ciudad    String?
-  activo    Boolean @default(true)
-
-  empresaId Int
-  Empresa   Empresa @relation(fields: [empresaId], references: [id], onDelete: Cascade)
-
-  Tarifa     Tarifa[]
+  id         Int          @id @default(autoincrement())
+  nombre     String
+  direccion  String?
+  comuna     String?
+  ciudad     String?
+  activo     Boolean      @default(true)
+  empresaId  Int
   Asignacion Asignacion[]
   Asistencia Asistencia[]
+  Empresa    Empresa      @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  Tarifa     Tarifa[]
 
   @@unique([empresaId, nombre])
 }
 
 model Tarifa {
-  id         Int @id @default(autoincrement())
-  empresaId Int
-  sucursalId Int
-  cargoId   Int
-
-  sueldoBase     Float @default(0)
-  bonoColacion   Float @default(0)
-  bonoLocomocion Float @default(0)
-  bonoAsistencia Float @default(0)
-  bonoNoche      Float @default(0)
-  otrosBonos     Float @default(0)
-
-  valorHoraExtra Float @default(0)
-
-  Cargo    Cargo    @relation(fields: [cargoId], references: [id])
-  Empresa  Empresa  @relation(fields: [empresaId], references: [id], onDelete: Cascade)
-  Sucursal Sucursal @relation(fields: [sucursalId], references: [id], onDelete: Cascade)
+  id             Int      @id @default(autoincrement())
+  empresaId      Int
+  sucursalId     Int
+  cargoId        Int
+  bonoAsistencia Float    @default(0)
+  bonoColacion   Float    @default(0)
+  bonoLocomocion Float    @default(0)
+  bonoNoche      Float    @default(0)
+  otrosBonos     Float    @default(0)
+  sueldoBase     Float    @default(0)
+  valorHoraExtra Float    @default(0)
+  Cargo          Cargo    @relation(fields: [cargoId], references: [id])
+  Empresa        Empresa  @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  Sucursal       Sucursal @relation(fields: [sucursalId], references: [id], onDelete: Cascade)
 
   @@unique([empresaId, sucursalId, cargoId])
 }
 
 model Trabajador {
-  id        Int      @id @default(autoincrement())
-  nombre    String
-  apellido  String
-  rut       String   @unique
-  telefono  String?
-  email     String?
-  activo    Boolean  @default(true)
-  createdAt DateTime @default(now())
-
+  id         Int          @id @default(autoincrement())
+  nombre     String
+  apellido   String
+  rut        String       @unique
+  telefono   String?
+  email      String?
+  activo     Boolean      @default(true)
+  createdAt  DateTime     @default(now())
   Asignacion Asignacion[]
   Asistencia Asistencia[]
 }
