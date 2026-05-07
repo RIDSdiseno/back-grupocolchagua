@@ -5,19 +5,51 @@ const prisma_1 = require("../lib/prisma");
 const validarRut_1 = require("../utils/validarRut");
 const listarTrabajadores = async (req, res) => {
     try {
-        const { activo } = req.query;
-        const where = activo !== undefined ? { activo: activo === "true" } : undefined;
+        const { activo, holdingId, empresaId, sucursalId } = req.query;
+        const where = {};
+        if (activo !== undefined) {
+            where.activo = activo === "true";
+        }
+        if (holdingId || empresaId || sucursalId) {
+            where.Asignacion = {
+                some: {
+                    ...(empresaId ? { empresaId: Number(empresaId) } : {}),
+                    ...(sucursalId ? { sucursalId: Number(sucursalId) } : {}),
+                    ...(holdingId
+                        ? {
+                            Sucursal: {
+                                holdingId: Number(holdingId),
+                            },
+                        }
+                        : {}),
+                },
+            };
+        }
         const trabajadores = await prisma_1.prisma.trabajador.findMany({
             where,
             orderBy: [{ apellido: "asc" }, { nombre: "asc" }],
+            include: {
+                Asignacion: {
+                    include: {
+                        Empresa: true,
+                        Cargo: true,
+                        Sucursal: {
+                            include: {
+                                Holding: true,
+                            },
+                        },
+                    },
+                },
+            },
         });
         return res.json({ ok: true, trabajadores });
     }
     catch (error) {
         console.error("ERROR LISTAR TRABAJADORES:", error);
-        return res
-            .status(500)
-            .json({ ok: false, message: "Error al listar trabajadores" });
+        return res.status(500).json({
+            ok: false,
+            message: error.message || "Error al listar trabajadores",
+        });
     }
 };
 exports.listarTrabajadores = listarTrabajadores;
@@ -31,6 +63,19 @@ const obtenerTrabajador = async (req, res) => {
         }
         const trabajador = await prisma_1.prisma.trabajador.findUnique({
             where: { id: trabajadorId },
+            include: {
+                Asignacion: {
+                    include: {
+                        Empresa: true,
+                        Cargo: true,
+                        Sucursal: {
+                            include: {
+                                Holding: true,
+                            },
+                        },
+                    },
+                },
+            },
         });
         if (!trabajador) {
             return res
@@ -149,9 +194,10 @@ const actualizarTrabajador = async (req, res) => {
                 where: { rut: rutFormateado, NOT: { id: trabajadorId } },
             });
             if (duplicado) {
-                return res
-                    .status(400)
-                    .json({ ok: false, message: "Ya existe otro trabajador con este RUT" });
+                return res.status(400).json({
+                    ok: false,
+                    message: "Ya existe otro trabajador con este RUT",
+                });
             }
             data.rut = rutFormateado;
         }

@@ -7,6 +7,66 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Holding {
+  id           Int              @id @default(autoincrement())
+  nombre       String           @unique
+  logoUrl      String?
+  logoPublicId String?
+
+  empresas     HoldingEmpresa[]
+  Sucursal     Sucursal[]
+}
+
+model HoldingEmpresa {
+  id        Int @id @default(autoincrement())
+  holdingId Int
+  empresaId Int
+
+  Holding   Holding @relation(fields: [holdingId], references: [id], onDelete: Cascade)
+  Empresa   Empresa @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+
+  @@unique([holdingId, empresaId])
+}
+
+model Empresa {
+  id                Int              @id @default(autoincrement())
+  nombre            String
+  rut               String?          @unique
+  logoPublicId      String?
+  logoUrl           String?
+  razonSocial       String?
+  encargadoNombre   String?
+  encargadoCorreo   String?
+  encargadoTelefono String?
+
+  holdings          HoldingEmpresa[]
+  Asignacion        Asignacion[]
+  Asistencia        Asistencia[]
+  Sucursal          Sucursal[]
+  Tarifa            Tarifa[]
+}
+
+model Sucursal {
+  id         Int      @id @default(autoincrement())
+  nombre     String
+  direccion  String?
+  comuna     String?
+  ciudad     String?
+  activo     Boolean  @default(true)
+
+  empresaId  Int
+  holdingId  Int
+
+  Empresa    Empresa  @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  Holding    Holding  @relation(fields: [holdingId], references: [id], onDelete: Cascade)
+
+  Asignacion Asignacion[]
+  Asistencia Asistencia[]
+  Tarifa     Tarifa[]
+
+  @@unique([empresaId, holdingId, nombre])
+}
+
 model Asignacion {
   id           Int        @id @default(autoincrement())
   trabajadorId Int
@@ -15,6 +75,7 @@ model Asignacion {
   cargoId      Int
   fechaInicio  DateTime
   fechaFin     DateTime?
+
   Cargo        Cargo      @relation(fields: [cargoId], references: [id])
   Empresa      Empresa    @relation(fields: [empresaId], references: [id])
   Sucursal     Sucursal?  @relation(fields: [sucursalId], references: [id])
@@ -32,6 +93,7 @@ model Asistencia {
   estado       String     @default("A")
   horasExtras  Float      @default(0)
   turno        String     @default("diurno")
+
   Cargo        Cargo      @relation(fields: [cargoId], references: [id])
   Empresa      Empresa    @relation(fields: [empresaId], references: [id])
   Sucursal     Sucursal?  @relation(fields: [sucursalId], references: [id])
@@ -43,41 +105,10 @@ model Asistencia {
 model Cargo {
   id         Int          @id @default(autoincrement())
   nombre     String       @unique
+
   Asignacion Asignacion[]
   Asistencia Asistencia[]
   Tarifa     Tarifa[]
-}
-
-model Empresa {
-  id                Int          @id @default(autoincrement())
-  nombre            String
-  rut               String?      @unique
-  logoPublicId      String?
-  logoUrl           String?
-  razonSocial       String?
-  encargadoNombre   String?
-  encargadoCorreo   String?
-  encargadoTelefono String?
-  Asignacion        Asignacion[]
-  Asistencia        Asistencia[]
-  Sucursal          Sucursal[]
-  Tarifa            Tarifa[]
-}
-
-model Sucursal {
-  id         Int          @id @default(autoincrement())
-  nombre     String
-  direccion  String?
-  comuna     String?
-  ciudad     String?
-  activo     Boolean      @default(true)
-  empresaId  Int
-  Asignacion Asignacion[]
-  Asistencia Asistencia[]
-  Empresa    Empresa      @relation(fields: [empresaId], references: [id], onDelete: Cascade)
-  Tarifa     Tarifa[]
-
-  @@unique([empresaId, nombre])
 }
 
 model Tarifa {
@@ -85,6 +116,7 @@ model Tarifa {
   empresaId      Int
   sucursalId     Int
   cargoId        Int
+
   bonoAsistencia Float    @default(0)
   bonoColacion   Float    @default(0)
   bonoLocomocion Float    @default(0)
@@ -92,6 +124,7 @@ model Tarifa {
   otrosBonos     Float    @default(0)
   sueldoBase     Float    @default(0)
   valorHoraExtra Float    @default(0)
+
   Cargo          Cargo    @relation(fields: [cargoId], references: [id])
   Empresa        Empresa  @relation(fields: [empresaId], references: [id], onDelete: Cascade)
   Sucursal       Sucursal @relation(fields: [sucursalId], references: [id], onDelete: Cascade)
@@ -108,6 +141,7 @@ model Trabajador {
   email      String?
   activo     Boolean      @default(true)
   createdAt  DateTime     @default(now())
+
   Asignacion Asignacion[]
   Asistencia Asistencia[]
 }

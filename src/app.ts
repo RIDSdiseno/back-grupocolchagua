@@ -9,6 +9,8 @@ import sucursalRoutes from "./routes/sucursal.routes";
 import trabajadorRoutes from "./routes/trabajador.routes";
 import asignacionRoutes from "./routes/asignacion.routes";
 import asistenciaRoutes from "./routes/asistencia.routes";
+import holdingRoutes from "./routes/Holding.routes";
+import usuarioRoutes from "./routes/Usuario.routes";
 
 const app = express();
 
@@ -71,6 +73,8 @@ app.use("/api/sucursales", sucursalRoutes);
 app.use("/api/trabajadores", trabajadorRoutes);
 app.use("/api/asignaciones", asignacionRoutes);
 app.use("/api/asistencia", asistenciaRoutes);
+app.use("/api/holdings", holdingRoutes);
+app.use("/api/usuarios", usuarioRoutes);
 
 app.use((_req, res) => {
   res.status(404).json({

@@ -35,10 +35,25 @@ const limpiarTexto = (valor) => {
     const texto = String(valor).trim();
     return texto.length > 0 ? texto : null;
 };
+const normalizarHoldingIds = (valor) => {
+    if (valor === undefined || valor === null)
+        return [];
+    const array = Array.isArray(valor) ? valor : [valor];
+    return array
+        .map((item) => Number(item))
+        .filter((id) => Number.isInteger(id) && id > 0);
+};
 const listarEmpresas = async (_req, res) => {
     try {
         const empresas = await prisma_1.prisma.empresa.findMany({
             orderBy: { id: "desc" },
+            include: {
+                holdings: {
+                    include: {
+                        Holding: true,
+                    },
+                },
+            },
         });
         return res.json({
             ok: true,
@@ -56,11 +71,18 @@ const listarEmpresas = async (_req, res) => {
 exports.listarEmpresas = listarEmpresas;
 const crearEmpresa = async (req, res) => {
     try {
-        const { razonSocial, alias, rut, encargadoNombre, encargadoCorreo, encargadoTelefono, } = req.body;
+        const { razonSocial, alias, rut, encargadoNombre, encargadoCorreo, encargadoTelefono, holdingIds, } = req.body;
+        const idsHoldings = normalizarHoldingIds(holdingIds);
         if (!razonSocial || !alias || !rut) {
             return res.status(400).json({
                 ok: false,
                 message: "Razón social, alias y RUT son obligatorios",
+            });
+        }
+        if (idsHoldings.length === 0) {
+            return res.status(400).json({
+                ok: false,
+                message: "Debes seleccionar al menos un holding",
             });
         }
         const rutLimpio = String(rut).trim();
@@ -82,6 +104,22 @@ const crearEmpresa = async (req, res) => {
                 message: "Ya existe una empresa registrada con este RUT",
             });
         }
+        const holdingsExistentes = await prisma_1.prisma.holding.findMany({
+            where: {
+                id: {
+                    in: idsHoldings,
+                },
+            },
+            select: {
+                id: true,
+            },
+        });
+        if (holdingsExistentes.length !== idsHoldings.length) {
+            return res.status(400).json({
+                ok: false,
+                message: "Uno o más holdings seleccionados no existen",
+            });
+        }
         let logoUrl = null;
         let logoPublicId = null;
         if (req.file) {
@@ -99,6 +137,18 @@ const crearEmpresa = async (req, res) => {
                 encargadoNombre: limpiarTexto(encargadoNombre),
                 encargadoCorreo: limpiarTexto(encargadoCorreo),
                 encargadoTelefono: limpiarTexto(encargadoTelefono),
+                holdings: {
+                    create: idsHoldings.map((holdingId) => ({
+                        holdingId,
+                    })),
+                },
+            },
+            include: {
+                holdings: {
+                    include: {
+                        Holding: true,
+                    },
+                },
             },
         });
         return res.status(201).json({
@@ -119,7 +169,7 @@ exports.crearEmpresa = crearEmpresa;
 const actualizarEmpresa = async (req, res) => {
     try {
         const { id } = req.params;
-        const { razonSocial, alias, rut, encargadoNombre, encargadoCorreo, encargadoTelefono, } = req.body;
+        const { razonSocial, alias, rut, encargadoNombre, encargadoCorreo, encargadoTelefono, holdingIds, } = req.body;
         const empresaId = Number(id);
         if (Number.isNaN(empresaId)) {
             return res.status(400).json({
@@ -127,13 +177,39 @@ const actualizarEmpresa = async (req, res) => {
                 message: "ID de empresa inválido",
             });
         }
+        const idsHoldings = normalizarHoldingIds(holdingIds);
+        if (idsHoldings.length === 0) {
+            return res.status(400).json({
+                ok: false,
+                message: "Debes seleccionar al menos un holding",
+            });
+        }
         const empresaExistente = await prisma_1.prisma.empresa.findUnique({
             where: { id: empresaId },
+            include: {
+                holdings: true,
+            },
         });
         if (!empresaExistente) {
             return res.status(404).json({
                 ok: false,
                 message: "Empresa no encontrada",
+            });
+        }
+        const holdingsExistentes = await prisma_1.prisma.holding.findMany({
+            where: {
+                id: {
+                    in: idsHoldings,
+                },
+            },
+            select: {
+                id: true,
+            },
+        });
+        if (holdingsExistentes.length !== idsHoldings.length) {
+            return res.status(400).json({
+                ok: false,
+                message: "Uno o más holdings seleccionados no existen",
             });
         }
         let rutFinal = empresaExistente.rut;
@@ -190,6 +266,19 @@ const actualizarEmpresa = async (req, res) => {
                 encargadoTelefono: encargadoTelefono !== undefined
                     ? limpiarTexto(encargadoTelefono)
                     : empresaExistente.encargadoTelefono,
+                holdings: {
+                    deleteMany: {},
+                    create: idsHoldings.map((holdingId) => ({
+                        holdingId,
+                    })),
+                },
+            },
+            include: {
+                holdings: {
+                    include: {
+                        Holding: true,
+                    },
+                },
             },
         });
         return res.json({

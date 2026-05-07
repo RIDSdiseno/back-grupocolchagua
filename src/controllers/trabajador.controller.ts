@@ -1,29 +1,59 @@
 import { Request, Response } from "express";
 import { prisma } from "../lib/prisma";
-import {
-  validarRut,
-  formatearRut,
-  limpiarRut,
-} from "../utils/validarRut";
+import { validarRut, formatearRut, limpiarRut } from "../utils/validarRut";
 
 export const listarTrabajadores = async (req: Request, res: Response) => {
   try {
-    const { activo } = req.query;
+    const { activo, holdingId, empresaId, sucursalId } = req.query;
 
-    const where =
-      activo !== undefined ? { activo: activo === "true" } : undefined;
+    const where: any = {};
+
+    if (activo !== undefined) {
+      where.activo = activo === "true";
+    }
+
+    if (holdingId || empresaId || sucursalId) {
+      where.Asignacion = {
+        some: {
+          ...(empresaId ? { empresaId: Number(empresaId) } : {}),
+          ...(sucursalId ? { sucursalId: Number(sucursalId) } : {}),
+          ...(holdingId
+            ? {
+                Sucursal: {
+                  holdingId: Number(holdingId),
+                },
+              }
+            : {}),
+        },
+      };
+    }
 
     const trabajadores = await prisma.trabajador.findMany({
       where,
       orderBy: [{ apellido: "asc" }, { nombre: "asc" }],
+      include: {
+        Asignacion: {
+          include: {
+            Empresa: true,
+            Cargo: true,
+            Sucursal: {
+              include: {
+                Holding: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     return res.json({ ok: true, trabajadores });
-  } catch (error) {
+  } catch (error: any) {
     console.error("ERROR LISTAR TRABAJADORES:", error);
-    return res
-      .status(500)
-      .json({ ok: false, message: "Error al listar trabajadores" });
+
+    return res.status(500).json({
+      ok: false,
+      message: error.message || "Error al listar trabajadores",
+    });
   }
 };
 
@@ -39,6 +69,19 @@ export const obtenerTrabajador = async (req: Request, res: Response) => {
 
     const trabajador = await prisma.trabajador.findUnique({
       where: { id: trabajadorId },
+      include: {
+        Asignacion: {
+          include: {
+            Empresa: true,
+            Cargo: true,
+            Sucursal: {
+              include: {
+                Holding: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!trabajador) {
@@ -179,9 +222,10 @@ export const actualizarTrabajador = async (req: Request, res: Response) => {
       });
 
       if (duplicado) {
-        return res
-          .status(400)
-          .json({ ok: false, message: "Ya existe otro trabajador con este RUT" });
+        return res.status(400).json({
+          ok: false,
+          message: "Ya existe otro trabajador con este RUT",
+        });
       }
 
       data.rut = rutFormateado;

@@ -13,6 +13,8 @@ const sucursal_routes_1 = __importDefault(require("./routes/sucursal.routes"));
 const trabajador_routes_1 = __importDefault(require("./routes/trabajador.routes"));
 const asignacion_routes_1 = __importDefault(require("./routes/asignacion.routes"));
 const asistencia_routes_1 = __importDefault(require("./routes/asistencia.routes"));
+const Holding_routes_1 = __importDefault(require("./routes/Holding.routes"));
+const Usuario_routes_1 = __importDefault(require("./routes/Usuario.routes"));
 const app = (0, express_1.default)();
 const allowedOrigins = [
     "https://grupocolchaguarrhh.netlify.app",
@@ -63,6 +65,8 @@ app.use("/api/sucursales", sucursal_routes_1.default);
 app.use("/api/trabajadores", trabajador_routes_1.default);
 app.use("/api/asignaciones", asignacion_routes_1.default);
 app.use("/api/asistencia", asistencia_routes_1.default);
+app.use("/api/holdings", Holding_routes_1.default);
+app.use("/api/usuarios", Usuario_routes_1.default);
 app.use((_req, res) => {
     res.status(404).json({
         ok: false,
