@@ -153,3 +153,30 @@ model Usuario {
   password String
   rol      String @default("ADMIN")
 }
+
+model MailingCampana {
+  id              Int                 @id @default(autoincrement())
+  asunto          String
+  cuerpo          String
+  grupo           String
+  estado          String              @default("BORRADOR")
+  fechaProgramada DateTime?
+  enviados        Int                 @default(0)
+  errores         Int                 @default(0)
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  destinatarios   MailingDestinatario[]
+}
+
+model MailingDestinatario {
+  id         Int      @id @default(autoincrement())
+  campanaId  Int
+  email      String
+  nombre     String?
+  estado     String   @default("PENDIENTE")
+  error      String?
+  enviadoAt  DateTime?
+
+  campana    MailingCampana @relation(fields: [campanaId], references: [id], onDelete: Cascade)
+}

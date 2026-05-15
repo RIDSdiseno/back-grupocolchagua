@@ -11,6 +11,7 @@ import asignacionRoutes from "./routes/asignacion.routes";
 import asistenciaRoutes from "./routes/asistencia.routes";
 import holdingRoutes from "./routes/Holding.routes";
 import usuarioRoutes from "./routes/Usuario.routes";
+import mailingRoutes from "./routes/mailing.routes";
 
 const app = express();
 
@@ -75,6 +76,7 @@ app.use("/api/asignaciones", asignacionRoutes);
 app.use("/api/asistencia", asistenciaRoutes);
 app.use("/api/holdings", holdingRoutes);
 app.use("/api/usuarios", usuarioRoutes);
+app.use("/api/mailing", mailingRoutes);
 
 app.use((_req, res) => {
   res.status(404).json({
