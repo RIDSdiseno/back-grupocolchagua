@@ -1,0 +1,82 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.enviarCorreo = void 0;
+const promises_1 = __importDefault(require("fs/promises"));
+const tenantId = process.env.GRAPH_TENANT_ID;
+const clientId = process.env.GRAPH_CLIENT_ID;
+const clientSecret = process.env.GRAPH_CLIENT_SECRET;
+const sender = process.env.GRAPH_SENDER || "administrador@grupocolchagua.cl";
+const obtenerAccessToken = async () => {
+    if (!tenantId || !clientId || !clientSecret) {
+        throw new Error("Faltan variables GRAPH_TENANT_ID, GRAPH_CLIENT_ID o GRAPH_CLIENT_SECRET.");
+    }
+    const params = new URLSearchParams();
+    params.append("client_id", clientId);
+    params.append("client_secret", clientSecret);
+    params.append("scope", "https://graph.microsoft.com/.default");
+    params.append("grant_type", "client_credentials");
+    const response = await fetch(`https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/token`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: params.toString(),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+        throw new Error(`Error obteniendo token Graph: ${data?.error_description || data?.error || "Error desconocido"}`);
+    }
+    return data.access_token;
+};
+const convertirAdjuntoGraph = async (archivo) => {
+    const buffer = await promises_1.default.readFile(archivo.path);
+    return {
+        "@odata.type": "#microsoft.graph.fileAttachment",
+        name: archivo.filename,
+        contentType: archivo.contentType || "application/octet-stream",
+        contentBytes: buffer.toString("base64"),
+    };
+};
+const enviarCorreo = async ({ to, subject, html, attachments = [], }) => {
+    const accessToken = await obtenerAccessToken();
+    const graphAttachments = await Promise.all(attachments.map(convertirAdjuntoGraph));
+    const response = await fetch(`https://graph.microsoft.com/v1.0/users/${encodeURIComponent(sender)}/sendMail`, {
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            message: {
+                subject,
+                body: {
+                    contentType: "HTML",
+                    content: html,
+                },
+                toRecipients: [
+                    {
+                        emailAddress: {
+                            address: to,
+                        },
+                    },
+                ],
+                attachments: graphAttachments,
+            },
+            saveToSentItems: true,
+        }),
+    });
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Error enviando correo Graph: ${response.status} ${response.statusText} - ${errorText}`);
+    }
+    return {
+        messageId: null,
+        accepted: [to],
+        rejected: [],
+        response: "Correo aceptado por Microsoft Graph",
+    };
+};
+exports.enviarCorreo = enviarCorreo;

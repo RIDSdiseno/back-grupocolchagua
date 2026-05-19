@@ -1,0 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const mailing_controller_1 = require("../controllers/mailing.controller");
+const upload_middleware_1 = require("../middlewares/upload.middleware");
+const router = (0, express_1.Router)();
+router.get("/", mailing_controller_1.listarCampanas);
+router.post("/", upload_middleware_1.uploadMailing.array("archivos", 10), mailing_controller_1.crearCampana);
+router.post("/:id/enviar", mailing_controller_1.enviarCampana);
+router.delete("/:id", mailing_controller_1.eliminarCampana);
+exports.default = router;

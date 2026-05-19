@@ -1,0 +1,12 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const preliquidaciones_controller_1 = require("../controllers/preliquidaciones.controller");
+const router = (0, express_1.Router)();
+router.get("/", preliquidaciones_controller_1.listarPreLiquidaciones);
+router.get("/:id", preliquidaciones_controller_1.obtenerPreLiquidacion);
+router.post("/generar", preliquidaciones_controller_1.generarPreLiquidaciones);
+router.put("/:id", preliquidaciones_controller_1.actualizarPreLiquidacion);
+router.patch("/:id/aprobar", preliquidaciones_controller_1.aprobarPreLiquidacion);
+router.delete("/:id", preliquidaciones_controller_1.eliminarPreLiquidacion);
+exports.default = router;

@@ -28,6 +28,7 @@ const corsOptions: cors.CorsOptions = {
   origin: (origin, callback) => {
     console.log("[CORS] incoming origin =", origin);
 
+    // Permitir requests sin origin (Postman, Railway health checks, server-to-server)
     if (!origin) {
       callback(null, true);
       return;
@@ -41,14 +42,11 @@ const corsOptions: cors.CorsOptions = {
     }
 
     console.warn("[CORS] blocked origin =", cleanOrigin);
-
     callback(new Error(`Origen no permitido por CORS: ${cleanOrigin}`));
   },
 
   credentials: true,
-
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-
   allowedHeaders: [
     "Content-Type",
     "Authorization",
@@ -57,24 +55,21 @@ const corsOptions: cors.CorsOptions = {
     "Pragma",
     "Expires",
   ],
-
+  exposedHeaders: ["Content-Length", "X-Request-Id"],
   optionsSuccessStatus: 204,
+  preflightContinue: false,
 };
 
+// ✅ Manejo de preflight OPTIONS global — debe ir ANTES de cualquier ruta
+app.options("/{*path}", cors(corsOptions));
+
+// ✅ CORS para todas las rutas
 app.use(cors(corsOptions));
-
-app.use((req, res, next) => {
-  if (req.method === "OPTIONS") {
-    res.sendStatus(204);
-    return;
-  }
-
-  next();
-});
 
 app.use(express.json({ limit: "60mb" }));
 app.use(express.urlencoded({ extended: true, limit: "60mb" }));
 
+// Rutas base
 app.get("/", (_req, res) => {
   res.json({ message: "API Grupo Colchagua funcionando" });
 });
@@ -83,6 +78,7 @@ app.get("/health", (_req, res) => {
   res.status(200).send("ok");
 });
 
+// Rutas API
 app.use("/api/auth", authRoutes);
 app.use("/api/empresas", empresaRoutes);
 app.use("/api/cargos", cargoRoutes);
@@ -97,6 +93,7 @@ app.use("/api/mailing", mailingRoutes);
 app.use("/api/incidencias", incidenciasRoutes);
 app.use("/api/preliquidaciones", preliquidacionesRoutes);
 
+// 404 handler
 app.use((_req, res) => {
   res.status(404).json({
     ok: false,

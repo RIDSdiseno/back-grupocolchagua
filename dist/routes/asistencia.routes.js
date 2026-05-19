@@ -7,6 +7,7 @@ const router = (0, express_1.Router)();
 router.get("/", auth_middleware_1.verificarToken, asistencia_controller_1.listarAsistencia);
 router.get("/resumen", auth_middleware_1.verificarToken, asistencia_controller_1.resumenAsistencia);
 router.post("/", auth_middleware_1.verificarToken, asistencia_controller_1.registrarAsistencia);
+router.post("/bulk", asistencia_controller_1.registrarAsistenciaMasiva);
 router.put("/:id", auth_middleware_1.verificarToken, asistencia_controller_1.actualizarAsistencia);
 router.delete("/:id", auth_middleware_1.verificarToken, asistencia_controller_1.eliminarAsistencia);
 exports.default = router;

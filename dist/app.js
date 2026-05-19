@@ -15,6 +15,9 @@ const asignacion_routes_1 = __importDefault(require("./routes/asignacion.routes"
 const asistencia_routes_1 = __importDefault(require("./routes/asistencia.routes"));
 const Holding_routes_1 = __importDefault(require("./routes/Holding.routes"));
 const Usuario_routes_1 = __importDefault(require("./routes/Usuario.routes"));
+const mailing_routes_1 = __importDefault(require("./routes/mailing.routes"));
+const incidencias_routes_1 = __importDefault(require("./routes/incidencias.routes"));
+const preliquidaciones_routes_1 = __importDefault(require("./routes/preliquidaciones.routes"));
 const app = (0, express_1.default)();
 const allowedOrigins = [
     "https://grupocolchaguarrhh.netlify.app",
@@ -26,17 +29,19 @@ const corsOptions = {
     origin: (origin, callback) => {
         console.log("[CORS] incoming origin =", origin);
         if (!origin) {
-            return callback(null, true);
+            callback(null, true);
+            return;
         }
         const cleanOrigin = origin.trim().replace(/\/+$/, "");
         if (allowedOrigins.includes(cleanOrigin)) {
-            return callback(null, true);
+            callback(null, true);
+            return;
         }
-        console.warn("[CORS] blocked origin =", origin);
-        return callback(null, false);
+        console.warn("[CORS] blocked origin =", cleanOrigin);
+        callback(new Error(`Origen no permitido por CORS: ${cleanOrigin}`));
     },
     credentials: true,
-    methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: [
         "Content-Type",
         "Authorization",
@@ -48,7 +53,13 @@ const corsOptions = {
     optionsSuccessStatus: 204,
 };
 app.use((0, cors_1.default)(corsOptions));
-app.options(/.*/, (0, cors_1.default)(corsOptions));
+app.use((req, res, next) => {
+    if (req.method === "OPTIONS") {
+        res.sendStatus(204);
+        return;
+    }
+    next();
+});
 app.use(express_1.default.json({ limit: "60mb" }));
 app.use(express_1.default.urlencoded({ extended: true, limit: "60mb" }));
 app.get("/", (_req, res) => {
@@ -67,6 +78,9 @@ app.use("/api/asignaciones", asignacion_routes_1.default);
 app.use("/api/asistencia", asistencia_routes_1.default);
 app.use("/api/holdings", Holding_routes_1.default);
 app.use("/api/usuarios", Usuario_routes_1.default);
+app.use("/api/mailing", mailing_routes_1.default);
+app.use("/api/incidencias", incidencias_routes_1.default);
+app.use("/api/preliquidaciones", preliquidaciones_routes_1.default);
 app.use((_req, res) => {
     res.status(404).json({
         ok: false,
