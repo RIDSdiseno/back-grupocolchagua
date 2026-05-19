@@ -127,13 +127,15 @@ model Tarifa {
   sucursalId Int
   cargoId    Int
 
-  bonoAsistencia Float @default(0)
-  bonoColacion   Float @default(0)
-  bonoLocomocion Float @default(0)
-  bonoNoche      Float @default(0)
-  otrosBonos     Float @default(0)
-  sueldoBase     Float @default(0)
-  valorHoraExtra Float @default(0)
+  sueldoBase          Float @default(0)
+  bonoAsistencia      Float @default(0)
+  bonoCaja            Float @default(0)
+  bonoResponsabilidad Float @default(0)
+  bonoColacion        Float @default(0)
+  bonoMovilizacion    Float @default(0)
+  bonoNoche           Float @default(0)
+  otrosBonos          Float @default(0)
+  valorHoraExtra      Float @default(0)
 
   Cargo    Cargo    @relation(fields: [cargoId], references: [id])
   Empresa  Empresa  @relation(fields: [empresaId], references: [id], onDelete: Cascade)
