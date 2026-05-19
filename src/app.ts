@@ -29,20 +29,26 @@ const corsOptions: cors.CorsOptions = {
     console.log("[CORS] incoming origin =", origin);
 
     if (!origin) {
-      return callback(null, true);
+      callback(null, true);
+      return;
     }
 
     const cleanOrigin = origin.trim().replace(/\/+$/, "");
 
     if (allowedOrigins.includes(cleanOrigin)) {
-      return callback(null, true);
+      callback(null, true);
+      return;
     }
 
-    console.warn("[CORS] blocked origin =", origin);
-    return callback(null, false);
+    console.warn("[CORS] blocked origin =", cleanOrigin);
+
+    callback(new Error(`Origen no permitido por CORS: ${cleanOrigin}`));
   },
+
   credentials: true,
-  methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE", "OPTIONS"],
+
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+
   allowedHeaders: [
     "Content-Type",
     "Authorization",
@@ -51,11 +57,12 @@ const corsOptions: cors.CorsOptions = {
     "Pragma",
     "Expires",
   ],
+
   optionsSuccessStatus: 204,
 };
 
 app.use(cors(corsOptions));
-app.options(/.*/, cors(corsOptions));
+app.options("*", cors(corsOptions));
 
 app.use(express.json({ limit: "60mb" }));
 app.use(express.urlencoded({ extended: true, limit: "60mb" }));
