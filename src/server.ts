@@ -1,4 +1,7 @@
 import app from "./app";
+import { iniciarMailingScheduler } from "./jobs/mailingScheduler";
+
+iniciarMailingScheduler();
 
 process.on("uncaughtException", (err) => {
   console.error("UNCAUGHT EXCEPTION:", err);

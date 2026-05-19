@@ -1,7 +1,16 @@
+import fs from "fs/promises";
+
+type GraphAttachment = {
+  filename: string;
+  path: string;
+  contentType?: string;
+};
+
 interface EnviarCorreoParams {
   to: string;
   subject: string;
   html: string;
+  attachments?: GraphAttachment[];
 }
 
 const tenantId = process.env.GRAPH_TENANT_ID;
@@ -11,7 +20,9 @@ const sender = process.env.GRAPH_SENDER || "administrador@grupocolchagua.cl";
 
 const obtenerAccessToken = async (): Promise<string> => {
   if (!tenantId || !clientId || !clientSecret) {
-    throw new Error("Faltan variables GRAPH_TENANT_ID, GRAPH_CLIENT_ID o GRAPH_CLIENT_SECRET.");
+    throw new Error(
+      "Faltan variables GRAPH_TENANT_ID, GRAPH_CLIENT_ID o GRAPH_CLIENT_SECRET."
+    );
   }
 
   const params = new URLSearchParams();
@@ -35,18 +46,42 @@ const obtenerAccessToken = async (): Promise<string> => {
 
   if (!response.ok) {
     throw new Error(
-      `Error obteniendo token Graph: ${data?.error_description || data?.error || "Error desconocido"}`
+      `Error obteniendo token Graph: ${
+        data?.error_description || data?.error || "Error desconocido"
+      }`
     );
   }
 
   return data.access_token;
 };
 
-export const enviarCorreo = async ({ to, subject, html }: EnviarCorreoParams) => {
+const convertirAdjuntoGraph = async (archivo: GraphAttachment) => {
+  const buffer = await fs.readFile(archivo.path);
+
+  return {
+    "@odata.type": "#microsoft.graph.fileAttachment",
+    name: archivo.filename,
+    contentType: archivo.contentType || "application/octet-stream",
+    contentBytes: buffer.toString("base64"),
+  };
+};
+
+export const enviarCorreo = async ({
+  to,
+  subject,
+  html,
+  attachments = [],
+}: EnviarCorreoParams) => {
   const accessToken = await obtenerAccessToken();
 
+  const graphAttachments = await Promise.all(
+    attachments.map(convertirAdjuntoGraph)
+  );
+
   const response = await fetch(
-    `https://graph.microsoft.com/v1.0/users/${encodeURIComponent(sender)}/sendMail`,
+    `https://graph.microsoft.com/v1.0/users/${encodeURIComponent(
+      sender
+    )}/sendMail`,
     {
       method: "POST",
       headers: {
@@ -67,6 +102,7 @@ export const enviarCorreo = async ({ to, subject, html }: EnviarCorreoParams) =>
               },
             },
           ],
+          attachments: graphAttachments,
         },
         saveToSentItems: true,
       }),

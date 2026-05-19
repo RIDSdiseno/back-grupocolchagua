@@ -12,6 +12,8 @@ import asistenciaRoutes from "./routes/asistencia.routes";
 import holdingRoutes from "./routes/Holding.routes";
 import usuarioRoutes from "./routes/Usuario.routes";
 import mailingRoutes from "./routes/mailing.routes";
+import incidenciasRoutes from "./routes/incidencias.routes";
+import preliquidacionesRoutes from "./routes/preliquidaciones.routes";
 
 const app = express();
 
@@ -77,6 +79,8 @@ app.use("/api/asistencia", asistenciaRoutes);
 app.use("/api/holdings", holdingRoutes);
 app.use("/api/usuarios", usuarioRoutes);
 app.use("/api/mailing", mailingRoutes);
+app.use("/api/incidencias", incidenciasRoutes);
+app.use("/api/preliquidaciones", preliquidacionesRoutes);
 
 app.use((_req, res) => {
   res.status(404).json({

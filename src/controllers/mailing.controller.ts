@@ -21,8 +21,15 @@ export const crearCampana = async (
   next: NextFunction
 ) => {
   try {
-    const { asunto, cuerpo, grupo, emailsPersonalizados, fechaProgramada } =
-      req.body;
+    const {
+      asunto,
+      cuerpo,
+      grupo,
+      emailsPersonalizados,
+      fechaProgramada,
+    } = req.body || {};
+
+    const archivos = (req.files as Express.Multer.File[]) || [];
 
     if (!asunto || !cuerpo || !grupo) {
       return res.status(400).json({
@@ -85,15 +92,27 @@ export const crearCampana = async (
         grupo: String(grupo),
         estado: fechaProgramada ? "PROGRAMADA" : "BORRADOR",
         fechaProgramada: fechaProgramada ? new Date(fechaProgramada) : null,
+
         destinatarios: {
           create: destinatarios.map((d) => ({
             email: d.email,
             nombre: d.nombre,
           })),
         },
+
+        adjuntos: {
+          create: archivos.map((archivo) => ({
+            nombreOriginal: archivo.originalname,
+            filename: archivo.filename,
+            mimeType: archivo.mimetype,
+            size: archivo.size,
+            path: archivo.path,
+          })),
+        },
       },
       include: {
         destinatarios: true,
+        adjuntos: true,
       },
     });
 
@@ -118,9 +137,11 @@ export const listarCampanas = async (
         createdAt: "desc",
       },
       include: {
+        adjuntos: true,
         _count: {
           select: {
             destinatarios: true,
+            adjuntos: true,
           },
         },
       },
@@ -154,6 +175,7 @@ export const enviarCampana = async (
       where: { id: campanaId },
       include: {
         destinatarios: true,
+        adjuntos: true,
       },
     });
 
@@ -164,18 +186,18 @@ export const enviarCampana = async (
       });
     }
 
-    if (campana.estado === "ENVIADA") {
-      return res.status(400).json({
-        ok: false,
-        message: "Esta campaña ya fue enviada.",
-      });
-    }
+    const attachments = campana.adjuntos.map((archivo) => ({
+      filename: archivo.nombreOriginal,
+      path: archivo.path,
+      contentType: archivo.mimeType,
+    }));
 
     console.log("INICIANDO ENVÍO DE CAMPAÑA:", {
       campanaId: campana.id,
       asunto: campana.asunto,
       grupo: campana.grupo,
       destinatarios: campana.destinatarios.length,
+      adjuntos: campana.adjuntos.length,
     });
 
     let enviados = 0;
@@ -189,6 +211,7 @@ export const enviarCampana = async (
           to: destinatario.email,
           subject: campana.asunto,
           html: campana.cuerpo,
+          attachments,
         });
 
         console.log("CORREO ENVIADO:", {
@@ -240,8 +263,21 @@ export const enviarCampana = async (
       where: { id: campanaId },
       data: {
         estado: errores === 0 ? "ENVIADA" : "ENVIADA_CON_ERRORES",
-        enviados,
-        errores,
+        enviados: {
+          increment: enviados,
+        },
+        errores: {
+          increment: errores,
+        },
+      },
+      include: {
+        adjuntos: true,
+        _count: {
+          select: {
+            destinatarios: true,
+            adjuntos: true,
+          },
+        },
       },
     });
 
