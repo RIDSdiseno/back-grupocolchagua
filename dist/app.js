@@ -22,6 +22,7 @@ const postulacion_routes_1 = __importDefault(require("./routes/postulacion.route
 const app = (0, express_1.default)();
 const allowedOrigins = [
     "https://grupocolchaguarrhh.netlify.app",
+    "https://grupocolchaguarrhh.netlify.app",
     "http://localhost:5173",
     "http://localhost:5174",
     "http://localhost:3000",
