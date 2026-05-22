@@ -215,7 +215,7 @@ export const generarPreLiquidaciones = async (req: Request, res: Response) => {
       const valorHoraExtra = Number(tarifa.valorHoraExtra) || 0;
 
       const colacion = Number(tarifa.bonoColacion) || 0;
-      const movilizacion = Number(tarifa.bonoLocomocion) || 0;
+      const movilizacion = Number(tarifa.bonoMovilizacion) || 0;
       const bonoTurnoNocturno = Number(tarifa.bonoNoche) || 0;
       const bonoImponible1 = Number(tarifa.bonoAsistencia) || 0;
       const bonoImponible2 = Number(tarifa.otrosBonos) || 0;
