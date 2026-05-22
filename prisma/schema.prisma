@@ -286,3 +286,23 @@ model MailingAdjunto {
 
   campana MailingCampana @relation(fields: [campanaId], references: [id], onDelete: Cascade)
 }
+
+model Postulacion {
+  id             Int      @id @default(autoincrement())
+  nombre         String
+  apellido       String
+  rut            String?
+  email          String
+  telefono       String
+  cargoPostula   String
+  comuna         String?
+  region         String?
+  experiencia    String?
+  disponibilidad String?
+  mensaje        String?
+  cvUrl          String
+  cvPublicId     String?
+  estado         String   @default("PENDIENTE")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}

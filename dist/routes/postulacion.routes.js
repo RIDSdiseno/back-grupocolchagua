@@ -1,0 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const postulacion_controller_1 = require("../controllers/postulacion.controller");
+const postulacion_upload_middleware_1 = require("../middlewares/postulacion-upload.middleware");
+const router = (0, express_1.Router)();
+router.get("/", postulacion_controller_1.listarPostulaciones);
+router.get("/:id", postulacion_controller_1.obtenerPostulacion);
+router.post("/", postulacion_upload_middleware_1.uploadPostulacion.single("cv"), postulacion_controller_1.crearPostulacion);
+router.patch("/:id/estado", postulacion_controller_1.actualizarEstadoPostulacion);
+exports.default = router;

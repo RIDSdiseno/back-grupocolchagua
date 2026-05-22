@@ -18,6 +18,7 @@ const Usuario_routes_1 = __importDefault(require("./routes/Usuario.routes"));
 const mailing_routes_1 = __importDefault(require("./routes/mailing.routes"));
 const incidencias_routes_1 = __importDefault(require("./routes/incidencias.routes"));
 const preliquidaciones_routes_1 = __importDefault(require("./routes/preliquidaciones.routes"));
+const postulacion_routes_1 = __importDefault(require("./routes/postulacion.routes"));
 const app = (0, express_1.default)();
 const allowedOrigins = [
     "https://grupocolchaguarrhh.netlify.app",
@@ -28,6 +29,7 @@ const allowedOrigins = [
 const corsOptions = {
     origin: (origin, callback) => {
         console.log("[CORS] incoming origin =", origin);
+        // Permitir requests sin origin (Postman, Railway health checks, server-to-server)
         if (!origin) {
             callback(null, true);
             return;
@@ -50,24 +52,24 @@ const corsOptions = {
         "Pragma",
         "Expires",
     ],
+    exposedHeaders: ["Content-Length", "X-Request-Id"],
     optionsSuccessStatus: 204,
+    preflightContinue: false,
 };
+// ✅ Manejo de preflight OPTIONS global — debe ir ANTES de cualquier ruta
+app.options("/{*path}", (0, cors_1.default)(corsOptions));
+// ✅ CORS para todas las rutas
 app.use((0, cors_1.default)(corsOptions));
-app.use((req, res, next) => {
-    if (req.method === "OPTIONS") {
-        res.sendStatus(204);
-        return;
-    }
-    next();
-});
 app.use(express_1.default.json({ limit: "60mb" }));
 app.use(express_1.default.urlencoded({ extended: true, limit: "60mb" }));
+// Rutas base
 app.get("/", (_req, res) => {
     res.json({ message: "API Grupo Colchagua funcionando" });
 });
 app.get("/health", (_req, res) => {
     res.status(200).send("ok");
 });
+// Rutas API
 app.use("/api/auth", auth_routes_1.default);
 app.use("/api/empresas", empresa_routes_1.default);
 app.use("/api/cargos", cargo_routes_1.default);
@@ -81,6 +83,8 @@ app.use("/api/usuarios", Usuario_routes_1.default);
 app.use("/api/mailing", mailing_routes_1.default);
 app.use("/api/incidencias", incidencias_routes_1.default);
 app.use("/api/preliquidaciones", preliquidaciones_routes_1.default);
+app.use("/api/postulaciones", postulacion_routes_1.default);
+// 404 handler
 app.use((_req, res) => {
     res.status(404).json({
         ok: false,

@@ -56,7 +56,7 @@ exports.listarTarifasPorEmpresa = listarTarifasPorEmpresa;
 const crearTarifaEmpresa = async (req, res) => {
     try {
         const empresaId = obtenerIdValido(req.params.empresaId);
-        const { sucursalId, cargoId, sueldoBase, bonoColacion, bonoLocomocion, bonoAsistencia, bonoNoche, otrosBonos, valorHoraExtra, } = req.body;
+        const { sucursalId, cargoId, sueldoBase, bonoAsistencia, bonoCaja, bonoResponsabilidad, bonoColacion, bonoMovilizacion, bonoNoche, otrosBonos, valorHoraExtra, } = req.body;
         const sucursalIdNumero = obtenerIdValido(sucursalId);
         const cargoIdNumero = obtenerIdValido(cargoId);
         if (!empresaId) {
@@ -128,9 +128,11 @@ const crearTarifaEmpresa = async (req, res) => {
                 sucursalId: sucursalIdNumero,
                 cargoId: cargoIdNumero,
                 sueldoBase: obtenerNumero(sueldoBase),
-                bonoColacion: obtenerNumero(bonoColacion),
-                bonoLocomocion: obtenerNumero(bonoLocomocion),
                 bonoAsistencia: obtenerNumero(bonoAsistencia),
+                bonoCaja: obtenerNumero(bonoCaja),
+                bonoResponsabilidad: obtenerNumero(bonoResponsabilidad),
+                bonoColacion: obtenerNumero(bonoColacion),
+                bonoMovilizacion: obtenerNumero(bonoMovilizacion),
                 bonoNoche: obtenerNumero(bonoNoche),
                 otrosBonos: obtenerNumero(otrosBonos),
                 valorHoraExtra: obtenerNumero(valorHoraExtra),
@@ -159,7 +161,7 @@ exports.crearTarifaEmpresa = crearTarifaEmpresa;
 const actualizarTarifa = async (req, res) => {
     try {
         const tarifaId = obtenerIdValido(req.params.id);
-        const { sucursalId, cargoId, sueldoBase, bonoColacion, bonoLocomocion, bonoAsistencia, bonoNoche, otrosBonos, valorHoraExtra, } = req.body;
+        const { sucursalId, cargoId, sueldoBase, bonoAsistencia, bonoCaja, bonoResponsabilidad, bonoColacion, bonoMovilizacion, bonoNoche, otrosBonos, valorHoraExtra, } = req.body;
         const sucursalIdNumero = obtenerIdValido(sucursalId);
         const cargoIdNumero = obtenerIdValido(cargoId);
         if (!tarifaId) {
@@ -232,9 +234,11 @@ const actualizarTarifa = async (req, res) => {
                 sucursalId: sucursalIdNumero,
                 cargoId: cargoIdNumero,
                 sueldoBase: obtenerNumero(sueldoBase),
-                bonoColacion: obtenerNumero(bonoColacion),
-                bonoLocomocion: obtenerNumero(bonoLocomocion),
                 bonoAsistencia: obtenerNumero(bonoAsistencia),
+                bonoCaja: obtenerNumero(bonoCaja),
+                bonoResponsabilidad: obtenerNumero(bonoResponsabilidad),
+                bonoColacion: obtenerNumero(bonoColacion),
+                bonoMovilizacion: obtenerNumero(bonoMovilizacion),
                 bonoNoche: obtenerNumero(bonoNoche),
                 otrosBonos: obtenerNumero(otrosBonos),
                 valorHoraExtra: obtenerNumero(valorHoraExtra),
