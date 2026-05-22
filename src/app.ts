@@ -20,7 +20,7 @@ const app = express();
 
 const allowedOrigins = [
   "https://grupocolchaguarrhh.netlify.app",
-  "https://grupocolchaguarrhh.netlify.app",
+  "https://grupcolchagua-frontend.netlify.app",
   "http://localhost:5173",
   "http://localhost:5174",
   "http://localhost:3000",
