@@ -15,6 +15,7 @@ import mailingRoutes from "./routes/mailing.routes";
 import incidenciasRoutes from "./routes/incidencias.routes";
 import preliquidacionesRoutes from "./routes/preliquidaciones.routes";
 import postulacionRoutes from "./routes/postulacion.routes";
+import empleoRoutes from "./routes/empleo.routes";
 
 const app = express();
 
@@ -95,6 +96,7 @@ app.use("/api/mailing", mailingRoutes);
 app.use("/api/incidencias", incidenciasRoutes);
 app.use("/api/preliquidaciones", preliquidacionesRoutes);
 app.use("/api/postulaciones", postulacionRoutes);
+app.use("/api/empleos", empleoRoutes);
 
 // 404 handler
 app.use((_req, res) => {

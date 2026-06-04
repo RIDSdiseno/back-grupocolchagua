@@ -2,14 +2,29 @@ import { Request, Response } from "express";
 import { prisma } from "../lib/prisma";
 import cloudinary from "../config/cloudinary";
 
+type EstadoPostulacion =
+  | "PENDIENTE"
+  | "POR_CONTACTAR"
+  | "CONTACTADO"
+  | "DESCARTADO";
+
 type CloudinaryUploadResult = {
   secure_url: string;
   public_id: string;
 };
 
+const ESTADOS_PERMITIDOS: EstadoPostulacion[] = [
+  "PENDIENTE",
+  "POR_CONTACTAR",
+  "CONTACTADO",
+  "DESCARTADO",
+];
+
 const limpiarTexto = (valor: unknown): string | null => {
   if (valor === undefined || valor === null) return null;
+
   const texto = String(valor).trim();
+
   return texto.length > 0 ? texto : null;
 };
 
@@ -183,7 +198,7 @@ export const actualizarEstadoPostulacion = async (
 ) => {
   try {
     const id = Number(req.params.id);
-    const { estado } = req.body;
+    const estado = String(req.body.estado).trim() as EstadoPostulacion;
 
     if (Number.isNaN(id)) {
       return res.status(400).json({
@@ -192,24 +207,29 @@ export const actualizarEstadoPostulacion = async (
       });
     }
 
-    const estadosPermitidos = [
-      "PENDIENTE",
-      "REVISADO",
-      "CONTACTADO",
-      "DESCARTADO",
-    ];
-
-    if (!estadosPermitidos.includes(String(estado))) {
+    if (!ESTADOS_PERMITIDOS.includes(estado)) {
       return res.status(400).json({
         ok: false,
         message: "Estado inválido",
+        estadosPermitidos: ESTADOS_PERMITIDOS,
+      });
+    }
+
+    const postulacionExistente = await prisma.postulacion.findUnique({
+      where: { id },
+    });
+
+    if (!postulacionExistente) {
+      return res.status(404).json({
+        ok: false,
+        message: "Postulación no encontrada",
       });
     }
 
     const postulacion = await prisma.postulacion.update({
       where: { id },
       data: {
-        estado: String(estado),
+        estado,
       },
     });
 
