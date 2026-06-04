@@ -1,0 +1,16 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const empleo_controller_1 = require("../controllers/empleo.controller");
+const router = (0, express_1.Router)();
+router.get("/", empleo_controller_1.listarEmpleos);
+router.get("/publicos", empleo_controller_1.listarEmpleosPublicos);
+router.get("/:id", empleo_controller_1.obtenerEmpleo);
+router.post("/", empleo_controller_1.crearEmpleo);
+router.put("/:id", empleo_controller_1.actualizarEmpleo);
+router.patch("/:id", empleo_controller_1.actualizarEmpleo);
+router.patch("/:id/publicar", empleo_controller_1.publicarEmpleo);
+router.patch("/:id/pausar", empleo_controller_1.pausarEmpleo);
+router.patch("/:id/cerrar", empleo_controller_1.cerrarEmpleo);
+router.delete("/:id", empleo_controller_1.eliminarEmpleo);
+exports.default = router;

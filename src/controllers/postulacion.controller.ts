@@ -80,6 +80,7 @@ export const crearPostulacion = async (req: Request, res: Response) => {
       experiencia,
       disponibilidad,
       mensaje,
+      empleoId,
     } = req.body;
 
     if (!nombre || !apellido || !email || !telefono || !cargoPostula) {
@@ -96,6 +97,44 @@ export const crearPostulacion = async (req: Request, res: Response) => {
         message: "El CV es obligatorio",
       });
     }
+
+    let empleoIdNumber: number | null = null;
+
+    if (empleoId !== undefined && empleoId !== null && String(empleoId).trim() !== "") {
+        empleoIdNumber = Number(empleoId);
+
+        if (!Number.isInteger(empleoIdNumber) || empleoIdNumber <= 0) {
+          return res.status(400).json({
+            ok: false,
+            message: "ID de empleo inválido",
+          });
+        }
+
+        const empleo = await prisma.empleo.findUnique({
+          where: { id: empleoIdNumber },
+        });
+
+        if (!empleo) {
+          return res.status(404).json({
+            ok: false,
+            message: "El empleo seleccionado no existe",
+          });
+        }
+
+        if (empleo.estado !== "PUBLICADO") {
+          return res.status(400).json({
+            ok: false,
+            message: "El empleo seleccionado no está disponible para postulación",
+          });
+        }
+
+        if (empleo.fechaCierre && empleo.fechaCierre < new Date()) {
+          return res.status(400).json({
+            ok: false,
+            message: "El empleo seleccionado ya cerró sus postulaciones",
+          });
+        }
+      }
 
     const upload = await subirCvCloudinary(
       req.file.buffer,
@@ -115,6 +154,7 @@ export const crearPostulacion = async (req: Request, res: Response) => {
         experiencia: limpiarTexto(experiencia),
         disponibilidad: limpiarTexto(disponibilidad),
         mensaje: limpiarTexto(mensaje),
+        empleoId: empleoIdNumber,
         cvUrl: upload.secure_url,
         cvPublicId: upload.public_id,
         estado: "PENDIENTE",
@@ -140,6 +180,9 @@ export const listarPostulaciones = async (_req: Request, res: Response) => {
   try {
     const postulaciones = await prisma.postulacion.findMany({
       orderBy: { createdAt: "desc" },
+      include: {
+        empleo: true,
+      },
     });
 
     return res.json({
@@ -169,6 +212,9 @@ export const obtenerPostulacion = async (req: Request, res: Response) => {
 
     const postulacion = await prisma.postulacion.findUnique({
       where: { id },
+      include: {
+        empleo: true,
+      },
     });
 
     if (!postulacion) {

@@ -19,10 +19,11 @@ const mailing_routes_1 = __importDefault(require("./routes/mailing.routes"));
 const incidencias_routes_1 = __importDefault(require("./routes/incidencias.routes"));
 const preliquidaciones_routes_1 = __importDefault(require("./routes/preliquidaciones.routes"));
 const postulacion_routes_1 = __importDefault(require("./routes/postulacion.routes"));
+const empleo_routes_1 = __importDefault(require("./routes/empleo.routes"));
 const app = (0, express_1.default)();
 const allowedOrigins = [
     "https://grupocolchaguarrhh.netlify.app",
-    "https://grupocolchaguarrhh.netlify.app",
+    "https://grupcolchagua-frontend.netlify.app",
     "http://localhost:5173",
     "http://localhost:5174",
     "http://localhost:3000",
@@ -85,6 +86,7 @@ app.use("/api/mailing", mailing_routes_1.default);
 app.use("/api/incidencias", incidencias_routes_1.default);
 app.use("/api/preliquidaciones", preliquidaciones_routes_1.default);
 app.use("/api/postulaciones", postulacion_routes_1.default);
+app.use("/api/empleos", empleo_routes_1.default);
 // 404 handler
 app.use((_req, res) => {
     res.status(404).json({

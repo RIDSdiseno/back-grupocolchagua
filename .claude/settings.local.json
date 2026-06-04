@@ -1,7 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\User\\\\OneDrive - rids.cl\\\\Escritorio\\\\grupocolchagua\\\\frontend\" -Force)"
-    ]
-  }
-}

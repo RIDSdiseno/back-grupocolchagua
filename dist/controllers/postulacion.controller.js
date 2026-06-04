@@ -6,6 +6,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.actualizarEstadoPostulacion = exports.obtenerPostulacion = exports.listarPostulaciones = exports.crearPostulacion = void 0;
 const prisma_1 = require("../lib/prisma");
 const cloudinary_1 = __importDefault(require("../config/cloudinary"));
+const ESTADOS_PERMITIDOS = [
+    "PENDIENTE",
+    "POR_CONTACTAR",
+    "CONTACTADO",
+    "DESCARTADO",
+];
 const limpiarTexto = (valor) => {
     if (valor === undefined || valor === null)
         return null;
@@ -41,7 +47,7 @@ const subirCvCloudinary = (fileBuffer, originalName) => {
 };
 const crearPostulacion = async (req, res) => {
     try {
-        const { nombre, apellido, rut, email, telefono, cargoPostula, comuna, region, experiencia, disponibilidad, mensaje, } = req.body;
+        const { nombre, apellido, rut, email, telefono, cargoPostula, comuna, region, experiencia, disponibilidad, mensaje, empleoId, } = req.body;
         if (!nombre || !apellido || !email || !telefono || !cargoPostula) {
             return res.status(400).json({
                 ok: false,
@@ -53,6 +59,37 @@ const crearPostulacion = async (req, res) => {
                 ok: false,
                 message: "El CV es obligatorio",
             });
+        }
+        let empleoIdNumber = null;
+        if (empleoId !== undefined && empleoId !== null && String(empleoId).trim() !== "") {
+            empleoIdNumber = Number(empleoId);
+            if (!Number.isInteger(empleoIdNumber) || empleoIdNumber <= 0) {
+                return res.status(400).json({
+                    ok: false,
+                    message: "ID de empleo inválido",
+                });
+            }
+            const empleo = await prisma_1.prisma.empleo.findUnique({
+                where: { id: empleoIdNumber },
+            });
+            if (!empleo) {
+                return res.status(404).json({
+                    ok: false,
+                    message: "El empleo seleccionado no existe",
+                });
+            }
+            if (empleo.estado !== "PUBLICADO") {
+                return res.status(400).json({
+                    ok: false,
+                    message: "El empleo seleccionado no está disponible para postulación",
+                });
+            }
+            if (empleo.fechaCierre && empleo.fechaCierre < new Date()) {
+                return res.status(400).json({
+                    ok: false,
+                    message: "El empleo seleccionado ya cerró sus postulaciones",
+                });
+            }
         }
         const upload = await subirCvCloudinary(req.file.buffer, req.file.originalname);
         const postulacion = await prisma_1.prisma.postulacion.create({
@@ -68,6 +105,7 @@ const crearPostulacion = async (req, res) => {
                 experiencia: limpiarTexto(experiencia),
                 disponibilidad: limpiarTexto(disponibilidad),
                 mensaje: limpiarTexto(mensaje),
+                empleoId: empleoIdNumber,
                 cvUrl: upload.secure_url,
                 cvPublicId: upload.public_id,
                 estado: "PENDIENTE",
@@ -92,6 +130,9 @@ const listarPostulaciones = async (_req, res) => {
     try {
         const postulaciones = await prisma_1.prisma.postulacion.findMany({
             orderBy: { createdAt: "desc" },
+            include: {
+                empleo: true,
+            },
         });
         return res.json({
             ok: true,
@@ -118,6 +159,9 @@ const obtenerPostulacion = async (req, res) => {
         }
         const postulacion = await prisma_1.prisma.postulacion.findUnique({
             where: { id },
+            include: {
+                empleo: true,
+            },
         });
         if (!postulacion) {
             return res.status(404).json({
@@ -142,29 +186,33 @@ exports.obtenerPostulacion = obtenerPostulacion;
 const actualizarEstadoPostulacion = async (req, res) => {
     try {
         const id = Number(req.params.id);
-        const { estado } = req.body;
+        const estado = String(req.body.estado).trim();
         if (Number.isNaN(id)) {
             return res.status(400).json({
                 ok: false,
                 message: "ID inválido",
             });
         }
-        const estadosPermitidos = [
-            "PENDIENTE",
-            "REVISADO",
-            "CONTACTADO",
-            "DESCARTADO",
-        ];
-        if (!estadosPermitidos.includes(String(estado))) {
+        if (!ESTADOS_PERMITIDOS.includes(estado)) {
             return res.status(400).json({
                 ok: false,
                 message: "Estado inválido",
+                estadosPermitidos: ESTADOS_PERMITIDOS,
+            });
+        }
+        const postulacionExistente = await prisma_1.prisma.postulacion.findUnique({
+            where: { id },
+        });
+        if (!postulacionExistente) {
+            return res.status(404).json({
+                ok: false,
+                message: "Postulación no encontrada",
             });
         }
         const postulacion = await prisma_1.prisma.postulacion.update({
             where: { id },
             data: {
-                estado: String(estado),
+                estado,
             },
         });
         return res.json({

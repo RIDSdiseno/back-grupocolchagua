@@ -275,27 +275,8 @@ model Postulacion {
   estado         String   @default("PENDIENTE")
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
-}
-
-enum EstadoEmpleo {
-  BORRADOR
-  PUBLICADO
-  PAUSADO
-  CERRADO
-}
-
-enum ModalidadEmpleo {
-  PRESENCIAL
-  REMOTO
-  HIBRIDO
-}
-
-enum JornadaEmpleo {
-  FULL_TIME
-  PART_TIME
-  TURNOS
-  FREELANCE
-  PRACTICA
+  empleoId Int?
+  empleo Empleo? @relation(fields: [empleoId], references: [id])
 }
 
 model Empleo {
@@ -318,6 +299,28 @@ model Empleo {
   publicadoEn DateTime?
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
+  postulaciones Postulacion[]
 
   @@map("empleos")
+}
+
+enum EstadoEmpleo {
+  BORRADOR
+  PUBLICADO
+  PAUSADO
+  CERRADO
+}
+
+enum ModalidadEmpleo {
+  PRESENCIAL
+  REMOTO
+  HIBRIDO
+}
+
+enum JornadaEmpleo {
+  FULL_TIME
+  PART_TIME
+  TURNOS
+  FREELANCE
+  PRACTICA
 }
