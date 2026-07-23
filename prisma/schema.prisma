@@ -275,30 +275,30 @@ model Postulacion {
   estado         String   @default("PENDIENTE")
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
-  empleoId Int?
-  empleo Empleo? @relation(fields: [empleoId], references: [id])
+  empleoId       Int?
+  empleo         Empleo?  @relation(fields: [empleoId], references: [id])
 }
 
 model Empleo {
-  id          Int              @id @default(autoincrement())
-  titulo      String
-  empresa     String?
-  cargo       String?
-  ubicacion   String?
-  comuna      String?
-  region      String?
-  modalidad   ModalidadEmpleo?
-  jornada     JornadaEmpleo?
-  sueldo      String?
-  descripcion String
-  requisitos  String?
-  beneficios  String?
-  vacantes    Int              @default(1)
-  estado      EstadoEmpleo     @default(BORRADOR)
-  fechaCierre DateTime?
-  publicadoEn DateTime?
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  id            Int              @id @default(autoincrement())
+  titulo        String
+  empresa       String?
+  cargo         String?
+  ubicacion     String?
+  comuna        String?
+  region        String?
+  modalidad     ModalidadEmpleo?
+  jornada       JornadaEmpleo?
+  sueldo        String?
+  descripcion   String
+  requisitos    String?
+  beneficios    String?
+  vacantes      Int              @default(1)
+  estado        EstadoEmpleo     @default(BORRADOR)
+  fechaCierre   DateTime?
+  publicadoEn   DateTime?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
   postulaciones Postulacion[]
 
   @@map("empleos")
