@@ -16,6 +16,7 @@ import incidenciasRoutes from "./routes/incidencias.routes";
 import preliquidacionesRoutes from "./routes/preliquidaciones.routes";
 import postulacionRoutes from "./routes/postulacion.routes";
 import empleoRoutes from "./routes/empleo.routes";
+import talanaRoutes from "./routes/talana.routes";
 
 const app = express();
 
@@ -31,7 +32,8 @@ const corsOptions: cors.CorsOptions = {
   origin: (origin, callback) => {
     console.log("[CORS] incoming origin =", origin);
 
-    // Permitir requests sin origin (Postman, Railway health checks, server-to-server)
+    // Permitir requests sin origin:
+    // Postman, Railway health checks y conexiones servidor a servidor.
     if (!origin) {
       callback(null, true);
       return;
@@ -45,7 +47,10 @@ const corsOptions: cors.CorsOptions = {
     }
 
     console.warn("[CORS] blocked origin =", cleanOrigin);
-    callback(new Error(`Origen no permitido por CORS: ${cleanOrigin}`));
+
+    callback(
+      new Error(`Origen no permitido por CORS: ${cleanOrigin}`),
+    );
   },
 
   credentials: true,
@@ -63,25 +68,32 @@ const corsOptions: cors.CorsOptions = {
   preflightContinue: false,
 };
 
-// ✅ Manejo de preflight OPTIONS global — debe ir ANTES de cualquier ruta
+// Manejo global de solicitudes preflight.
 app.options("/{*path}", cors(corsOptions));
 
-// ✅ CORS para todas las rutas
+// CORS para todas las rutas.
 app.use(cors(corsOptions));
 
 app.use(express.json({ limit: "60mb" }));
-app.use(express.urlencoded({ extended: true, limit: "60mb" }));
+app.use(
+  express.urlencoded({
+    extended: true,
+    limit: "60mb",
+  }),
+);
 
-// Rutas base
+// Rutas base.
 app.get("/", (_req, res) => {
-  res.json({ message: "API Grupo Colchagua funcionando" });
+  res.json({
+    message: "API Grupo Colchagua funcionando",
+  });
 });
 
 app.get("/health", (_req, res) => {
   res.status(200).send("ok");
 });
 
-// Rutas API
+// Rutas API.
 app.use("/api/auth", authRoutes);
 app.use("/api/empresas", empresaRoutes);
 app.use("/api/cargos", cargoRoutes);
@@ -97,8 +109,10 @@ app.use("/api/incidencias", incidenciasRoutes);
 app.use("/api/preliquidaciones", preliquidacionesRoutes);
 app.use("/api/postulaciones", postulacionRoutes);
 app.use("/api/empleos", empleoRoutes);
+app.use("/api/talana", talanaRoutes);
 
-// 404 handler
+// Manejador de rutas inexistentes.
+// Siempre debe permanecer después de todas las rutas.
 app.use((_req, res) => {
   res.status(404).json({
     ok: false,
