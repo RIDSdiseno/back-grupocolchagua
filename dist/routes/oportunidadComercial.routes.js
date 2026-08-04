@@ -1,0 +1,25 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+// src/routes/oportunidadComercial.routes.ts
+const express_1 = require("express");
+const oportunidadComercial_controller_1 = require("../controllers/oportunidadComercial.controller");
+const auth_middleware_1 = require("../middlewares/auth.middleware");
+const router = (0, express_1.Router)();
+router.get("/", auth_middleware_1.verificarToken, oportunidadComercial_controller_1.listarOportunidadesComerciales);
+router.post("/", auth_middleware_1.verificarToken, oportunidadComercial_controller_1.crearOportunidadComercial);
+router.get("/:id", auth_middleware_1.verificarToken, oportunidadComercial_controller_1.obtenerOportunidadComercial);
+router.patch("/:id", auth_middleware_1.verificarToken, oportunidadComercial_controller_1.actualizarOportunidadComercial);
+router.patch("/:id/etapa", auth_middleware_1.verificarToken, oportunidadComercial_controller_1.actualizarEtapaOportunidadComercial);
+router.get("/:id/etapa-prospecto", auth_middleware_1.verificarToken, oportunidadComercial_controller_1.obtenerEtapaProspecto);
+router.patch("/:id/etapa-prospecto", auth_middleware_1.verificarToken, oportunidadComercial_controller_1.actualizarEtapaProspecto);
+router.get("/:id/etapa-contactado", auth_middleware_1.verificarToken, oportunidadComercial_controller_1.obtenerEtapaContactado);
+router.patch("/:id/etapa-contactado", auth_middleware_1.verificarToken, oportunidadComercial_controller_1.actualizarEtapaContactado);
+router.get("/:id/etapa-propuesta", auth_middleware_1.verificarToken, oportunidadComercial_controller_1.obtenerEtapaPropuesta);
+router.patch("/:id/etapa-propuesta", auth_middleware_1.verificarToken, oportunidadComercial_controller_1.actualizarEtapaPropuesta);
+router.get("/:id/etapa-negociacion", auth_middleware_1.verificarToken, oportunidadComercial_controller_1.obtenerEtapaNegociacion);
+router.patch("/:id/etapa-negociacion", auth_middleware_1.verificarToken, oportunidadComercial_controller_1.actualizarEtapaNegociacion);
+router.get("/:id/cierre-ganada", auth_middleware_1.verificarToken, oportunidadComercial_controller_1.obtenerCierreGanada);
+router.post("/:id/cerrar-ganada", auth_middleware_1.verificarToken, oportunidadComercial_controller_1.confirmarCierreGanada);
+router.post("/:id/marcar-perdida", auth_middleware_1.verificarToken, oportunidadComercial_controller_1.marcarOportunidadPerdida);
+router.post("/:id/postergar", auth_middleware_1.verificarToken, oportunidadComercial_controller_1.postergarOportunidadComercial);
+exports.default = router;

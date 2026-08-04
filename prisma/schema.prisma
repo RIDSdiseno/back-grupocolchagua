@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["relationJoins"]
 }
 
 datasource db {
@@ -27,40 +28,43 @@ model HoldingEmpresa {
 }
 
 model Empresa {
-  id                   Int                    @id @default(autoincrement())
-  nombre               String
-  rut                  String?                @unique
-  logoPublicId         String?
-  logoUrl              String?
-  razonSocial          String?
-  encargadoNombre      String?
-  encargadoCorreo      String?
-  encargadoTelefono    String?
-  Asignacion           Asignacion[]
-  Asistencia           Asistencia[]
-  holdings             HoldingEmpresa[]
-  IncidenciaAsistencia IncidenciaAsistencia[]
-  PreLiquidacion       PreLiquidacion[]
-  Sucursal             Sucursal[]
-  Tarifa               Tarifa[]
+  id                       Int                        @id @default(autoincrement())
+  nombre                   String
+  rut                      String?                    @unique
+  logoPublicId             String?
+  logoUrl                  String?
+  razonSocial              String?
+  encargadoNombre          String?
+  encargadoCorreo          String?
+  encargadoTelefono        String?
+  Asignacion               Asignacion[]
+  Asistencia               Asistencia[]
+  holdings                 HoldingEmpresa[]
+  IncidenciaAsistencia     IncidenciaAsistencia[]
+  OportunidadComercial     OportunidadComercial[]
+  OportunidadReclutamiento OportunidadReclutamiento[]
+  PreLiquidacion           PreLiquidacion[]
+  Sucursal                 Sucursal[]
+  Tarifa                   Tarifa[]
 }
 
 model Sucursal {
-  id                   Int                    @id @default(autoincrement())
-  nombre               String
-  direccion            String?
-  comuna               String?
-  ciudad               String?
-  activo               Boolean                @default(true)
-  empresaId            Int
-  holdingId            Int
-  Asignacion           Asignacion[]
-  Asistencia           Asistencia[]
-  IncidenciaAsistencia IncidenciaAsistencia[]
-  PreLiquidacion       PreLiquidacion[]
-  Empresa              Empresa                @relation(fields: [empresaId], references: [id], onDelete: Cascade)
-  Holding              Holding                @relation(fields: [holdingId], references: [id], onDelete: Cascade)
-  Tarifa               Tarifa[]
+  id                       Int                        @id @default(autoincrement())
+  nombre                   String
+  direccion                String?
+  comuna                   String?
+  ciudad                   String?
+  activo                   Boolean                    @default(true)
+  empresaId                Int
+  holdingId                Int
+  Asignacion               Asignacion[]
+  Asistencia               Asistencia[]
+  IncidenciaAsistencia     IncidenciaAsistencia[]
+  OportunidadReclutamiento OportunidadReclutamiento[]
+  PreLiquidacion           PreLiquidacion[]
+  Empresa                  Empresa                    @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  Holding                  Holding                    @relation(fields: [holdingId], references: [id], onDelete: Cascade)
+  Tarifa                   Tarifa[]
 
   @@unique([empresaId, holdingId, nombre])
 }
@@ -102,13 +106,14 @@ model Asistencia {
 }
 
 model Cargo {
-  id                   Int                    @id @default(autoincrement())
-  nombre               String                 @unique
-  Asignacion           Asignacion[]
-  Asistencia           Asistencia[]
-  IncidenciaAsistencia IncidenciaAsistencia[]
-  PreLiquidacion       PreLiquidacion[]
-  Tarifa               Tarifa[]
+  id                       Int                        @id @default(autoincrement())
+  nombre                   String                     @unique
+  Asignacion               Asignacion[]
+  Asistencia               Asistencia[]
+  IncidenciaAsistencia     IncidenciaAsistencia[]
+  OportunidadReclutamiento OportunidadReclutamiento[]
+  PreLiquidacion           PreLiquidacion[]
+  Tarifa                   Tarifa[]
 }
 
 model Tarifa {
@@ -148,11 +153,20 @@ model Trabajador {
 }
 
 model Usuario {
-  id       Int    @id @default(autoincrement())
-  nombre   String
-  email    String @unique
-  password String
-  rol      String @default("ADMIN")
+  id                                    Int                                 @id @default(autoincrement())
+  nombre                                String
+  email                                 String                              @unique
+  password                              String
+  rol                                   String                              @default("ADMIN")
+  ArchivoDocumentacionReclutamiento     ArchivoDocumentacionReclutamiento[] @ignore
+  PropuestasComercialesEnviadas         DatosEtapaPropuestaComercial[]      @relation("ResponsableEnvioPropuestaComercial")
+  MovimientosOportunidadComercial       HistorialOportunidadComercial[]
+  OportunidadesComercialesCreadas       OportunidadComercial[]              @relation("CreadorOportunidadComercial")
+  OportunidadesComercialesComoEjecutivo OportunidadComercial[]              @relation("EjecutivoOportunidadComercial")
+  OportunidadesEntrevista               OportunidadEntrevista[]             @relation("ResponsableEntrevista")
+  MovimientosOportunidad                OportunidadHistorial[]
+  OportunidadesActualizadas             OportunidadReclutamiento[]          @relation("ActualizadoPorEtapaNuevos")
+  OportunidadesComoReclutador           OportunidadReclutamiento[]          @relation("ReclutadorResponsable")
 }
 
 model IncidenciaAsistencia {
@@ -258,50 +272,469 @@ model MailingAdjunto {
 }
 
 model Postulacion {
-  id             Int      @id @default(autoincrement())
-  nombre         String
-  apellido       String
-  rut            String?
-  email          String
-  telefono       String
-  cargoPostula   String
-  comuna         String?
-  region         String?
-  experiencia    String?
-  disponibilidad String?
-  mensaje        String?
-  cvUrl          String
-  cvPublicId     String?
-  estado         String   @default("PENDIENTE")
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  empleoId       Int?
-  empleo         Empleo?  @relation(fields: [empleoId], references: [id])
+  id                                Int                                 @id @default(autoincrement())
+  nombre                            String
+  apellido                          String
+  rut                               String?
+  email                             String
+  telefono                          String
+  cargoPostula                      String
+  comuna                            String?
+  region                            String?
+  experiencia                       String?
+  disponibilidad                    String?
+  mensaje                           String?
+  cvUrl                             String
+  cvPublicId                        String?
+  estado                            String                              @default("PENDIENTE")
+  createdAt                         DateTime                            @default(now())
+  updatedAt                         DateTime                            @updatedAt
+  empleoId                          Int?
+  ArchivoDocumentacionReclutamiento ArchivoDocumentacionReclutamiento[] @ignore
+  empleo                            Empleo?                             @relation(fields: [empleoId], references: [id])
 }
 
 model Empleo {
-  id            Int              @id @default(autoincrement())
-  titulo        String
-  empresa       String?
-  cargo         String?
-  ubicacion     String?
-  comuna        String?
-  region        String?
-  modalidad     ModalidadEmpleo?
-  jornada       JornadaEmpleo?
-  sueldo        String?
-  descripcion   String
-  requisitos    String?
-  beneficios    String?
-  vacantes      Int              @default(1)
-  estado        EstadoEmpleo     @default(BORRADOR)
-  fechaCierre   DateTime?
-  publicadoEn   DateTime?
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
-  postulaciones Postulacion[]
+  id                       Int                        @id @default(autoincrement())
+  titulo                   String
+  empresa                  String?
+  cargo                    String?
+  ubicacion                String?
+  comuna                   String?
+  region                   String?
+  modalidad                ModalidadEmpleo?
+  jornada                  JornadaEmpleo?
+  sueldo                   String?
+  descripcion              String
+  requisitos               String?
+  beneficios               String?
+  vacantes                 Int                        @default(1)
+  estado                   EstadoEmpleo               @default(BORRADOR)
+  fechaCierre              DateTime?
+  publicadoEn              DateTime?
+  createdAt                DateTime                   @default(now())
+  updatedAt                DateTime                   @updatedAt
+  OportunidadReclutamiento OportunidadReclutamiento[]
+  postulaciones            Postulacion[]
 
   @@map("empleos")
+}
+
+model OportunidadReclutamiento {
+  id                                Int                                 @id @default(autoincrement())
+  empresaId                         Int
+  cargoId                           Int
+  sucursalId                        Int?
+  cantidadNecesaria                 Int
+  jornada                           JornadaOportunidad
+  fechaInicio                       DateTime
+  fechaLimite                       DateTime?
+  reclutadorResponsableId           Int
+  observaciones                     String?
+  estado                            EstadoOportunidad                   @default(NUEVOS)
+  createdAt                         DateTime                            @default(now())
+  updatedAt                         DateTime                            @updatedAt
+  actualizadoPorId                  Int?
+  empleoId                          Int?
+  estadoBusqueda                    EstadoBusquedaOportunidad?
+  fechaCierreBusqueda               DateTime?
+  fechaEstimadaIngreso              DateTime?
+  fechaInicioBusqueda               DateTime?
+  observacionesEtapaNuevos          String?
+  prioridad                         PrioridadOportunidad?
+  fechaCierrePreseleccion           DateTime?
+  fechaInicioPreseleccion           DateTime?
+  observacionesPreseleccion         String?
+  postulantesDescartados            Int                                 @default(0)
+  postulantesPreseleccion           Int                                 @default(0)
+  postulantesRevisados              Int                                 @default(0)
+  motivoDescarte                    String?
+  motivoDescarteOtro                String?
+  motivoPerdida                     String?
+  motivoPostergacion                String?
+  perdida                           Boolean                             @default(false)
+  postergada                        Boolean                             @default(false)
+  ArchivoDocumentacionReclutamiento ArchivoDocumentacionReclutamiento[] @ignore
+  CierreComercialOrigen             DatosCierreGanadaComercial?
+  Contratados                       DatosEtapaContratados?
+  Documentacion                     DatosEtapaDocumentacion?
+  DocumentosRequeridos              DocumentoRequeridoOportunidad[]
+  FuentesExternas                   FuentePostulacionExterna[]
+  Entrevista                        OportunidadEntrevista?
+  Historial                         OportunidadHistorial[]
+  ActualizadoPor                    Usuario?                            @relation("ActualizadoPorEtapaNuevos", fields: [actualizadoPorId], references: [id])
+  Cargo                             Cargo                               @relation(fields: [cargoId], references: [id])
+  Empleo                            Empleo?                             @relation(fields: [empleoId], references: [id])
+  Empresa                           Empresa                             @relation(fields: [empresaId], references: [id])
+  ReclutadorResponsable             Usuario                             @relation("ReclutadorResponsable", fields: [reclutadorResponsableId], references: [id])
+  Sucursal                          Sucursal?                           @relation(fields: [sucursalId], references: [id])
+
+  @@index([empresaId])
+  @@index([cargoId])
+  @@index([sucursalId])
+  @@index([reclutadorResponsableId])
+  @@index([actualizadoPorId])
+  @@index([empleoId])
+  @@index([estado])
+}
+
+model DatosEtapaDocumentacion {
+  id                                 Int                      @id @default(autoincrement())
+  oportunidadId                      Int                      @unique
+  documentacionPendiente             Int                      @default(0)
+  documentacionEnRevision            Int                      @default(0)
+  documentacionCompleta              Int                      @default(0)
+  documentacionObservada             Int                      @default(0)
+  fechaInicioDocumentacion           DateTime?
+  fechaEstimadaDocumentacionCompleta DateTime?
+  fechaRealDocumentacionCompleta     DateTime?
+  fechaEstimadaIngreso               DateTime?
+  estadoEtapa                        EstadoEtapaDocumentacion @default(PENDIENTE)
+  observacionesDocumentacion         String?
+  createdAt                          DateTime                 @default(now())
+  updatedAt                          DateTime                 @updatedAt
+  Oportunidad                        OportunidadReclutamiento @relation(fields: [oportunidadId], references: [id], onDelete: Cascade)
+
+  @@index([oportunidadId])
+  @@index([estadoEtapa])
+}
+
+model DatosEtapaContratados {
+  id                       Int                                     @id @default(autoincrement())
+  oportunidadId            Int                                     @unique
+  personasContratadas      Int                                     @default(0)
+  personasNoIngresaron     Int                                     @default(0)
+  fechaPrimerIngreso       DateTime?
+  fechaCierreProceso       DateTime?
+  observacionesContratados String?
+  createdAt                DateTime                                @default(now())
+  updatedAt                DateTime                                @updatedAt
+  Oportunidad              OportunidadReclutamiento                @relation(fields: [oportunidadId], references: [id], onDelete: Cascade)
+  MotivosNoIngreso         OportunidadContratadosMotivoNoIngreso[]
+
+  @@index([oportunidadId])
+}
+
+model OportunidadContratadosMotivoNoIngreso {
+  id                Int                   @id @default(autoincrement())
+  contratadosId     Int
+  motivo            String
+  motivoOtro        String?
+  motivoNormalizado String
+  cantidad          Int
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+  Contratados       DatosEtapaContratados @relation(fields: [contratadosId], references: [id], onDelete: Cascade)
+
+  @@unique([contratadosId, motivoNormalizado])
+  @@index([contratadosId])
+}
+
+model DocumentoRequeridoOportunidad {
+  id                                Int                                 @id @default(autoincrement())
+  oportunidadId                     Int
+  nombre                            String
+  nombreNormalizado                 String
+  obligatorio                       Boolean                             @default(true)
+  observaciones                     String?
+  createdAt                         DateTime                            @default(now())
+  updatedAt                         DateTime                            @updatedAt
+  cantidadEntregada                 Int                                 @default(0)
+  tipoDocumento                     String                              @default("Otro")
+  ArchivoDocumentacionReclutamiento ArchivoDocumentacionReclutamiento[] @ignore
+  Oportunidad                       OportunidadReclutamiento            @relation(fields: [oportunidadId], references: [id], onDelete: Cascade)
+
+  @@unique([oportunidadId, nombreNormalizado])
+  @@index([oportunidadId])
+}
+
+model ArchivoDocumentacionReclutamiento {
+  id                            Int                            @id @default(autoincrement())
+  oportunidadId                 Int
+  documentoRequeridoId          Int?
+  postulacionId                 Int?
+  nombreOriginal                String
+  tipoDocumento                 String
+  secureUrl                     String
+  publicId                      String
+  resourceType                  String
+  formato                       String?
+  tamanoBytes                   Int
+  fechaCarga                    DateTime                       @default(now())
+  usuarioCargaId                Int
+  estadoArchivo                 EstadoArchivoDocumentacion     @default(ACTIVO)
+  observaciones                 String?
+  createdAt                     DateTime                       @default(now())
+  updatedAt                     DateTime                       @updatedAt
+  DocumentoRequeridoOportunidad DocumentoRequeridoOportunidad? @relation(fields: [documentoRequeridoId], references: [id])
+  OportunidadReclutamiento      OportunidadReclutamiento       @relation(fields: [oportunidadId], references: [id], onDelete: Cascade)
+  Postulacion                   Postulacion?                   @relation(fields: [postulacionId], references: [id])
+  Usuario                       Usuario                        @relation(fields: [usuarioCargaId], references: [id])
+
+  @@index([oportunidadId])
+  @@index([documentoRequeridoId])
+  @@index([postulacionId])
+  @@index([usuarioCargaId])
+  @@index([estadoArchivo])
+  @@ignore
+}
+
+model OportunidadEntrevista {
+  id                         Int                                    @id @default(autoincrement())
+  oportunidadId              Int                                    @unique
+  entrevistasAgendadas       Int                                    @default(0)
+  entrevistasRealizadas      Int                                    @default(0)
+  noAsistieron               Int                                    @default(0)
+  desistieronAntesEntrevista Int                                    @default(0)
+  aptos                      Int                                    @default(0)
+  noAptos                    Int                                    @default(0)
+  fechaInicioEntrevistas     DateTime?
+  fechaTerminoEntrevistas    DateTime?
+  modalidadEntrevista        String?
+  responsableEntrevistaId    Int?
+  nivelGeneralCandidatos     String?
+  fueNecesarioRepublicar     Boolean?
+  motivoRepublicacion        String?
+  motivoRepublicacionOtro    String?
+  observacionesEntrevista    String?
+  createdAt                  DateTime                               @default(now())
+  updatedAt                  DateTime                               @updatedAt
+  Oportunidad                OportunidadReclutamiento               @relation(fields: [oportunidadId], references: [id], onDelete: Cascade)
+  ResponsableEntrevista      Usuario?                               @relation("ResponsableEntrevista", fields: [responsableEntrevistaId], references: [id])
+  MotivosNoAptitud           OportunidadEntrevistaMotivoNoAptitud[]
+
+  @@index([oportunidadId])
+  @@index([responsableEntrevistaId])
+}
+
+model OportunidadEntrevistaMotivoNoAptitud {
+  id                  Int                   @id @default(autoincrement())
+  entrevistaId        Int
+  motivoPersonalizado String?
+  motivoNormalizado   String
+  cantidad            Int
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  motivos             String[]
+  Entrevista          OportunidadEntrevista @relation(fields: [entrevistaId], references: [id], onDelete: Cascade)
+
+  @@unique([entrevistaId, motivoNormalizado])
+  @@index([entrevistaId])
+}
+
+model FuentePostulacionExterna {
+  id                Int                      @id @default(autoincrement())
+  oportunidadId     Int
+  nombre            String
+  nombreNormalizado String
+  cantidad          Int
+  createdAt         DateTime                 @default(now())
+  updatedAt         DateTime                 @updatedAt
+  Oportunidad       OportunidadReclutamiento @relation(fields: [oportunidadId], references: [id], onDelete: Cascade)
+
+  @@unique([oportunidadId, nombreNormalizado])
+  @@index([oportunidadId])
+}
+
+model OportunidadHistorial {
+  id             Int                       @id @default(autoincrement())
+  oportunidadId  Int
+  tipo           TipoMovimientoOportunidad
+  estadoAnterior EstadoOportunidad?
+  estadoNuevo    EstadoOportunidad?
+  detalle        String?
+  usuarioId      Int
+  createdAt      DateTime                  @default(now())
+  Oportunidad    OportunidadReclutamiento  @relation(fields: [oportunidadId], references: [id], onDelete: Cascade)
+  Usuario        Usuario                   @relation(fields: [usuarioId], references: [id])
+
+  @@index([oportunidadId])
+}
+
+model OportunidadComercial {
+  id                    Int                             @id @default(autoincrement())
+  empresaId             Int?
+  prospectoNombre       String?
+  prospectoRut          String?
+  contactoNombre        String
+  contactoCargo         String?
+  contactoTelefono      String?
+  contactoEmail         String?
+  nombreOportunidad     String
+  tipoServicio          String
+  descripcionNecesidad  String?
+  cantidadTrabajadores  Int?
+  cargoPerfil           String?
+  region                String?
+  comuna                String?
+  montoEstimado         Float?
+  fechaInicioEstimada   DateTime?
+  ejecutivoId           Int
+  prioridad             PrioridadOportunidadComercial   @default(MEDIA)
+  etapa                 EtapaOportunidadComercial       @default(PROSPECTO)
+  proximaActividad      String?
+  fechaProximaActividad DateTime?
+  observaciones         String?
+  createdById           Int
+  createdAt             DateTime                        @default(now())
+  updatedAt             DateTime                        @updatedAt
+  tipoServicioOtro      String?
+  motivoPerdida         String?
+  motivoPostergacion    String?
+  perdida               Boolean                         @default(false)
+  postergada            Boolean                         @default(false)
+  DatosCierreGanada     DatosCierreGanadaComercial?
+  DatosContactado       DatosEtapaContactadoComercial?
+  DatosNegociacion      DatosEtapaNegociacionComercial?
+  DatosPropuesta        DatosEtapaPropuestaComercial?
+  DatosProspecto        DatosEtapaProspectoComercial?
+  Historial             HistorialOportunidadComercial[]
+  CreadoPor             Usuario                         @relation("CreadorOportunidadComercial", fields: [createdById], references: [id])
+  Ejecutivo             Usuario                         @relation("EjecutivoOportunidadComercial", fields: [ejecutivoId], references: [id])
+  Empresa               Empresa?                        @relation(fields: [empresaId], references: [id])
+
+  @@index([empresaId])
+  @@index([ejecutivoId])
+  @@index([createdById])
+  @@index([etapa])
+  @@index([prioridad])
+}
+
+model HistorialOportunidadComercial {
+  id            Int                                @id @default(autoincrement())
+  oportunidadId Int
+  tipo          TipoMovimientoOportunidadComercial
+  etapaAnterior EtapaOportunidadComercial?
+  etapaNueva    EtapaOportunidadComercial?
+  detalle       String?
+  usuarioId     Int
+  createdAt     DateTime                           @default(now())
+  Oportunidad   OportunidadComercial               @relation(fields: [oportunidadId], references: [id], onDelete: Cascade)
+  Usuario       Usuario                            @relation(fields: [usuarioId], references: [id])
+
+  @@index([oportunidadId])
+}
+
+model DatosEtapaContactadoComercial {
+  id                         Int                       @id @default(autoincrement())
+  oportunidadId              Int                       @unique
+  cambioServicio             Boolean?
+  cambioCantidadTrabajadores Boolean?
+  cambioFechaInicio          Boolean?
+  necesidadActiva            NecesidadActivaComercial?
+  createdAt                  DateTime                  @default(now())
+  updatedAt                  DateTime                  @updatedAt
+  Oportunidad                OportunidadComercial      @relation(fields: [oportunidadId], references: [id], onDelete: Cascade)
+
+  @@index([oportunidadId])
+}
+
+model DatosEtapaProspectoComercial {
+  id                     Int                             @id @default(autoincrement())
+  oportunidadId          Int                             @unique
+  origenProspecto        OrigenProspectoComercial?
+  origenProspectoOtro    String?
+  fechaIncorporacion     DateTime?
+  necesidadPreliminar    String?
+  nivelInteres           NivelInteresProspectoComercial?
+  medioContactoPreferido MedioContactoComercial?
+  proximaAccion          String?
+  fechaProximaAccion     DateTime?
+  observacionesProspecto String?
+  createdAt              DateTime                        @default(now())
+  updatedAt              DateTime                        @updatedAt
+  Oportunidad            OportunidadComercial            @relation(fields: [oportunidadId], references: [id], onDelete: Cascade)
+
+  @@index([oportunidadId])
+}
+
+model DatosEtapaPropuestaComercial {
+  id                     Int                           @id @default(autoincrement())
+  oportunidadId          Int                           @unique
+  fechaEnvio             DateTime?
+  medioEnvio             MedioEnvioPropuestaComercial?
+  medioEnvioOtro         String?
+  propuestaEnviada       Boolean?
+  valorPropuesta         Float?
+  vigenciaPropuesta      DateTime?
+  responsableEnvioId     Int?
+  observacionesPropuesta String?
+  createdAt              DateTime                      @default(now())
+  updatedAt              DateTime                      @updatedAt
+  Oportunidad            OportunidadComercial          @relation(fields: [oportunidadId], references: [id], onDelete: Cascade)
+  ResponsableEnvio       Usuario?                      @relation("ResponsableEnvioPropuestaComercial", fields: [responsableEnvioId], references: [id])
+
+  @@index([oportunidadId])
+  @@index([responsableEnvioId])
+}
+
+model DatosEtapaNegociacionComercial {
+  id                            Int                         @id @default(autoincrement())
+  oportunidadId                 Int                         @unique
+  fechaRespuesta                DateTime?
+  estadoNegociacion             EstadoNegociacionComercial?
+  descripcionCambiosSolicitados String?
+  cambioValorPropuesta          Boolean?
+  cambioServicio                Boolean?
+  cambioCantidadTrabajadores    Boolean?
+  cambioFechaInicio             Boolean?
+  proximaGestion                String?
+  fechaProximaGestion           DateTime?
+  observacionesNegociacion      String?
+  createdAt                     DateTime                    @default(now())
+  updatedAt                     DateTime                    @updatedAt
+  Oportunidad                   OportunidadComercial        @relation(fields: [oportunidadId], references: [id], onDelete: Cascade)
+
+  @@index([oportunidadId])
+}
+
+model DatosCierreGanadaComercial {
+  id                            Int                       @id @default(autoincrement())
+  oportunidadId                 Int                       @unique
+  fechaCierre                   DateTime?
+  valorFinalAcordado            Float?
+  servicioContratado            String?
+  servicioContratadoOtro        String?
+  cantidadFinalTrabajadores     Int?
+  fechaInicioEstimada           DateTime?
+  duracionServicio              String?
+  estadoAcuerdo                 EstadoAcuerdoComercial?
+  observacionesFinales          String?
+  crearOportunidadReclutamiento Boolean                   @default(false)
+  oportunidadReclutamientoId    Int?                      @unique
+  createdAt                     DateTime                  @default(now())
+  updatedAt                     DateTime                  @updatedAt
+  Oportunidad                   OportunidadComercial      @relation(fields: [oportunidadId], references: [id], onDelete: Cascade)
+  OportunidadReclutamiento      OportunidadReclutamiento? @relation(fields: [oportunidadReclutamientoId], references: [id])
+
+  @@index([oportunidadId])
+  @@index([oportunidadReclutamientoId])
+}
+
+enum TipoMovimientoOportunidad {
+  CREACION
+  EDICION_GENERAL
+  EDICION_ETAPA_NUEVOS
+  CAMBIO_ESTADO
+  EDICION_ETAPA_PRESELECCION
+  EDICION_ETAPA_ENTREVISTA
+  EDICION_ETAPA_DOCUMENTACION
+  EDICION_ETAPA_CONTRATADOS
+  MARCADA_PERDIDA
+  POSTERGADA
+}
+
+enum EstadoBusquedaOportunidad {
+  ACTIVA
+  PAUSADA
+  CERRADA
+  CANCELADA
+}
+
+enum PrioridadOportunidad {
+  ALTA
+  MEDIA
+  BAJA
 }
 
 enum EstadoEmpleo {
@@ -323,4 +756,113 @@ enum JornadaEmpleo {
   TURNOS
   FREELANCE
   PRACTICA
+}
+
+enum EstadoOportunidad {
+  NUEVOS
+  PRESELECCION
+  ENTREVISTA
+  SELECCIONADOS
+  CONTRATADOS
+  DOCUMENTACION
+}
+
+enum JornadaOportunidad {
+  FULL_TIME
+  PART_TIME
+  AMBAS
+}
+
+enum EstadoEtapaDocumentacion {
+  PENDIENTE
+  EN_REVISION
+  COMPLETA
+  OBSERVADA
+  CANCELADA
+}
+
+enum EstadoArchivoDocumentacion {
+  ACTIVO
+  REEMPLAZADO
+  ELIMINADO
+}
+
+enum PrioridadOportunidadComercial {
+  BAJA
+  MEDIA
+  ALTA
+  URGENTE
+}
+
+enum EtapaOportunidadComercial {
+  PROSPECTO
+  CONTACTADO
+  PROPUESTA
+  NEGOCIACION
+  GANADA
+  PERDIDA
+}
+
+enum TipoMovimientoOportunidadComercial {
+  CREACION
+  EDICION_GENERAL
+  CAMBIO_ETAPA
+  EDICION_ETAPA_PROSPECTO
+  EDICION_ETAPA_CONTACTADO
+  EDICION_ETAPA_PROPUESTA
+  EDICION_ETAPA_NEGOCIACION
+  CIERRE_GANADA
+  MARCADA_PERDIDA
+  POSTERGADA
+}
+
+enum OrigenProspectoComercial {
+  REFERIDO
+  PAGINA_WEB
+  LLAMADA_SALIENTE
+  CORREO_ELECTRONICO
+  LINKEDIN
+  WHATSAPP
+  OTRO
+}
+
+enum NivelInteresProspectoComercial {
+  BAJO
+  MEDIO
+  ALTO
+}
+
+enum MedioContactoComercial {
+  TELEFONO
+  CORREO
+  WHATSAPP
+  REUNION
+}
+
+enum MedioEnvioPropuestaComercial {
+  CORREO_ELECTRONICO
+  WHATSAPP
+  REUNION_PRESENCIAL
+  VIDEOLLAMADA
+  OTRO
+}
+
+enum EstadoNegociacionComercial {
+  EN_NEGOCIACION
+  SOLICITA_CAMBIOS
+  SOLICITA_REBAJA
+  EN_EVALUACION
+  ACEPTA_CONDICIONES
+  RECHAZA_PROPUESTA
+}
+
+enum EstadoAcuerdoComercial {
+  CONFIRMADO
+  PENDIENTE_FIRMA
+}
+
+enum NecesidadActivaComercial {
+  SI
+  NO
+  A_FUTURO
 }

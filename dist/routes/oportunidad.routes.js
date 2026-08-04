@@ -1,0 +1,28 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+// src/routes/oportunidad.routes.ts
+const express_1 = require("express");
+const oportunidad_controller_1 = require("../controllers/oportunidad.controller");
+const auth_middleware_1 = require("../middlewares/auth.middleware");
+const router = (0, express_1.Router)();
+router.get("/", auth_middleware_1.verificarToken, oportunidad_controller_1.listarOportunidades);
+router.post("/", auth_middleware_1.verificarToken, oportunidad_controller_1.crearOportunidad);
+router.get("/:id", auth_middleware_1.verificarToken, oportunidad_controller_1.obtenerOportunidad);
+router.patch("/:id", auth_middleware_1.verificarToken, oportunidad_controller_1.actualizarOportunidad);
+router.patch("/:id/estado", auth_middleware_1.verificarToken, oportunidad_controller_1.actualizarEstadoOportunidad);
+router.post("/:id/marcar-perdida", auth_middleware_1.verificarToken, oportunidad_controller_1.marcarOportunidadPerdida);
+router.post("/:id/postergar", auth_middleware_1.verificarToken, oportunidad_controller_1.postergarOportunidad);
+router.patch("/:id/etapa-nuevos", auth_middleware_1.verificarToken, oportunidad_controller_1.actualizarEtapaNuevos);
+router.patch("/:id/etapa-preseleccion", auth_middleware_1.verificarToken, oportunidad_controller_1.actualizarEtapaPreseleccion);
+router.patch("/:id/etapa-entrevista", auth_middleware_1.verificarToken, oportunidad_controller_1.actualizarEtapaEntrevista);
+router.get("/:id/etapa-documentacion", auth_middleware_1.verificarToken, oportunidad_controller_1.obtenerEtapaDocumentacion);
+router.patch("/:id/etapa-documentacion", auth_middleware_1.verificarToken, oportunidad_controller_1.actualizarEtapaDocumentacion);
+router.get("/:id/etapa-contratados", auth_middleware_1.verificarToken, oportunidad_controller_1.obtenerEtapaContratados);
+router.patch("/:id/etapa-contratados", auth_middleware_1.verificarToken, oportunidad_controller_1.actualizarEtapaContratados);
+router.post("/:id/documentos-requeridos", auth_middleware_1.verificarToken, oportunidad_controller_1.crearDocumentoRequerido);
+router.patch("/:id/documentos-requeridos/:documentoId", auth_middleware_1.verificarToken, oportunidad_controller_1.actualizarDocumentoRequerido);
+router.delete("/:id/documentos-requeridos/:documentoId", auth_middleware_1.verificarToken, oportunidad_controller_1.eliminarDocumentoRequerido);
+router.post("/:id/fuentes-externas", auth_middleware_1.verificarToken, oportunidad_controller_1.crearFuenteExterna);
+router.patch("/:id/fuentes-externas/:fuenteId", auth_middleware_1.verificarToken, oportunidad_controller_1.actualizarFuenteExterna);
+router.delete("/:id/fuentes-externas/:fuenteId", auth_middleware_1.verificarToken, oportunidad_controller_1.eliminarFuenteExterna);
+exports.default = router;

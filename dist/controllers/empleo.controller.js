@@ -233,26 +233,33 @@ const actualizarEmpleo = async (req, res) => {
             dataActualizacion.comuna = limpiarTexto(comuna);
         if (region !== undefined)
             dataActualizacion.region = limpiarTexto(region);
-        if (modalidad !== undefined)
+        if (modalidad !== undefined) {
             dataActualizacion.modalidad = modalidad
                 ? String(modalidad)
                 : null;
-        if (jornada !== undefined)
+        }
+        if (jornada !== undefined) {
             dataActualizacion.jornada = jornada
                 ? String(jornada)
                 : null;
+        }
         if (sueldo !== undefined)
             dataActualizacion.sueldo = limpiarTexto(sueldo);
-        if (descripcion !== undefined)
+        if (descripcion !== undefined) {
             dataActualizacion.descripcion = String(descripcion).trim();
-        if (requisitos !== undefined)
+        }
+        if (requisitos !== undefined) {
             dataActualizacion.requisitos = limpiarTexto(requisitos);
-        if (beneficios !== undefined)
+        }
+        if (beneficios !== undefined) {
             dataActualizacion.beneficios = limpiarTexto(beneficios);
-        if (vacantes !== undefined)
+        }
+        if (vacantes !== undefined) {
             dataActualizacion.vacantes = parseEntero(vacantes, 1);
-        if (fechaCierre !== undefined)
+        }
+        if (fechaCierre !== undefined) {
             dataActualizacion.fechaCierre = parseFecha(fechaCierre);
+        }
         if (estado !== undefined) {
             const nuevoEstado = String(estado);
             dataActualizacion.estado = nuevoEstado;
@@ -292,6 +299,15 @@ const publicarEmpleo = async (req, res) => {
                 message: "ID inválido",
             });
         }
+        const empleoExistente = await prisma_1.prisma.empleo.findUnique({
+            where: { id },
+        });
+        if (!empleoExistente) {
+            return res.status(404).json({
+                ok: false,
+                message: "Empleo no encontrado",
+            });
+        }
         const empleo = await prisma_1.prisma.empleo.update({
             where: { id },
             data: {
@@ -321,6 +337,15 @@ const pausarEmpleo = async (req, res) => {
             return res.status(400).json({
                 ok: false,
                 message: "ID inválido",
+            });
+        }
+        const empleoExistente = await prisma_1.prisma.empleo.findUnique({
+            where: { id },
+        });
+        if (!empleoExistente) {
+            return res.status(404).json({
+                ok: false,
+                message: "Empleo no encontrado",
             });
         }
         const empleo = await prisma_1.prisma.empleo.update({
@@ -353,6 +378,15 @@ const cerrarEmpleo = async (req, res) => {
                 message: "ID inválido",
             });
         }
+        const empleoExistente = await prisma_1.prisma.empleo.findUnique({
+            where: { id },
+        });
+        if (!empleoExistente) {
+            return res.status(404).json({
+                ok: false,
+                message: "Empleo no encontrado",
+            });
+        }
         const empleo = await prisma_1.prisma.empleo.update({
             where: { id },
             data: {
@@ -381,6 +415,15 @@ const eliminarEmpleo = async (req, res) => {
             return res.status(400).json({
                 ok: false,
                 message: "ID inválido",
+            });
+        }
+        const empleoExistente = await prisma_1.prisma.empleo.findUnique({
+            where: { id },
+        });
+        if (!empleoExistente) {
+            return res.status(404).json({
+                ok: false,
+                message: "Empleo no encontrado",
             });
         }
         await prisma_1.prisma.empleo.delete({

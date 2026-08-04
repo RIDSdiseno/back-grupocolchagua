@@ -20,6 +20,10 @@ const incidencias_routes_1 = __importDefault(require("./routes/incidencias.route
 const preliquidaciones_routes_1 = __importDefault(require("./routes/preliquidaciones.routes"));
 const postulacion_routes_1 = __importDefault(require("./routes/postulacion.routes"));
 const empleo_routes_1 = __importDefault(require("./routes/empleo.routes"));
+const talana_routes_1 = __importDefault(require("./routes/talana.routes"));
+const oportunidad_routes_1 = __importDefault(require("./routes/oportunidad.routes"));
+const dashboard_routes_1 = __importDefault(require("./routes/dashboard.routes"));
+const oportunidadComercial_routes_1 = __importDefault(require("./routes/oportunidadComercial.routes"));
 const app = (0, express_1.default)();
 const allowedOrigins = [
     "https://grupocolchaguarrhh.netlify.app",
@@ -31,7 +35,8 @@ const allowedOrigins = [
 const corsOptions = {
     origin: (origin, callback) => {
         console.log("[CORS] incoming origin =", origin);
-        // Permitir requests sin origin (Postman, Railway health checks, server-to-server)
+        // Permitir requests sin origin:
+        // Postman, Railway health checks y conexiones servidor a servidor.
         if (!origin) {
             callback(null, true);
             return;
@@ -58,20 +63,25 @@ const corsOptions = {
     optionsSuccessStatus: 204,
     preflightContinue: false,
 };
-// ✅ Manejo de preflight OPTIONS global — debe ir ANTES de cualquier ruta
+// Manejo global de solicitudes preflight.
 app.options("/{*path}", (0, cors_1.default)(corsOptions));
-// ✅ CORS para todas las rutas
+// CORS para todas las rutas.
 app.use((0, cors_1.default)(corsOptions));
 app.use(express_1.default.json({ limit: "60mb" }));
-app.use(express_1.default.urlencoded({ extended: true, limit: "60mb" }));
-// Rutas base
+app.use(express_1.default.urlencoded({
+    extended: true,
+    limit: "60mb",
+}));
+// Rutas base.
 app.get("/", (_req, res) => {
-    res.json({ message: "API Grupo Colchagua funcionando" });
+    res.json({
+        message: "API Grupo Colchagua funcionando",
+    });
 });
 app.get("/health", (_req, res) => {
     res.status(200).send("ok");
 });
-// Rutas API
+// Rutas API.
 app.use("/api/auth", auth_routes_1.default);
 app.use("/api/empresas", empresa_routes_1.default);
 app.use("/api/cargos", cargo_routes_1.default);
@@ -87,7 +97,12 @@ app.use("/api/incidencias", incidencias_routes_1.default);
 app.use("/api/preliquidaciones", preliquidaciones_routes_1.default);
 app.use("/api/postulaciones", postulacion_routes_1.default);
 app.use("/api/empleos", empleo_routes_1.default);
-// 404 handler
+app.use("/api/talana", talana_routes_1.default);
+app.use("/api/oportunidades", oportunidad_routes_1.default);
+app.use("/api/dashboard", dashboard_routes_1.default);
+app.use("/api/oportunidades-comerciales", oportunidadComercial_routes_1.default);
+// Manejador de rutas inexistentes.
+// Siempre debe permanecer después de todas las rutas.
 app.use((_req, res) => {
     res.status(404).json({
         ok: false,
