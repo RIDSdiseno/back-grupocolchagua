@@ -20,12 +20,15 @@ import talanaRoutes from "./routes/talana.routes";
 import oportunidadRoutes from "./routes/oportunidad.routes";
 import dashboardRoutes from "./routes/dashboard.routes";
 import oportunidadComercialRoutes from "./routes/oportunidadComercial.routes";
+import contactoRoutes from "./routes/contacto.routes";
 
 const app = express();
 
 const allowedOrigins = [
   "https://grupocolchaguarrhh.netlify.app",
   "https://grupcolchagua-frontend.netlify.app",
+  "https://grupocolchagua.cl",
+  "https://www.grupocolchagua.cl",
   "http://localhost:5173",
   "http://localhost:5174",
   "http://localhost:3000",
@@ -116,6 +119,7 @@ app.use("/api/talana", talanaRoutes);
 app.use("/api/oportunidades", oportunidadRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/oportunidades-comerciales", oportunidadComercialRoutes);
+app.use("/api/contacto", contactoRoutes);
 
 // Manejador de rutas inexistentes.
 // Siempre debe permanecer después de todas las rutas.

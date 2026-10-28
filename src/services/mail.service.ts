@@ -11,6 +11,7 @@ interface EnviarCorreoParams {
   subject: string;
   html: string;
   attachments?: GraphAttachment[];
+  cc?: string | string[];
 }
 
 const tenantId = process.env.GRAPH_TENANT_ID;
@@ -71,6 +72,7 @@ export const enviarCorreo = async ({
   subject,
   html,
   attachments = [],
+  cc,
 }: EnviarCorreoParams) => {
   const accessToken = await obtenerAccessToken();
 
@@ -102,6 +104,13 @@ export const enviarCorreo = async ({
               },
             },
           ],
+          ...(cc
+            ? {
+                ccRecipients: (Array.isArray(cc) ? cc : [cc]).map((addr) => ({
+                  emailAddress: { address: addr },
+                })),
+              }
+            : {}),
           attachments: graphAttachments,
         },
         saveToSentItems: true,
