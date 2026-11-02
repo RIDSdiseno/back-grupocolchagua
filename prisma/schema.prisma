@@ -9,12 +9,13 @@ datasource db {
 }
 
 model Holding {
-  id           Int              @id @default(autoincrement())
-  nombre       String           @unique
-  logoUrl      String?
-  logoPublicId String?
-  empresas     HoldingEmpresa[]
-  Sucursal     Sucursal[]
+  id                   Int                    @id @default(autoincrement())
+  nombre               String                 @unique
+  logoUrl              String?
+  logoPublicId         String?
+  empresas             HoldingEmpresa[]
+  OportunidadComercial OportunidadComercial[]
+  Sucursal             Sucursal[]
 }
 
 model HoldingEmpresa {
@@ -39,6 +40,7 @@ model Empresa {
   encargadoTelefono        String?
   Asignacion               Asignacion[]
   Asistencia               Asistencia[]
+  Cotizacion               Cotizacion[]
   holdings                 HoldingEmpresa[]
   IncidenciaAsistencia     IncidenciaAsistencia[]
   OportunidadComercial     OportunidadComercial[]
@@ -110,6 +112,7 @@ model Cargo {
   nombre                   String                     @unique
   Asignacion               Asignacion[]
   Asistencia               Asistencia[]
+  CotizacionItem           CotizacionItem[]
   IncidenciaAsistencia     IncidenciaAsistencia[]
   OportunidadReclutamiento OportunidadReclutamiento[]
   PreLiquidacion           PreLiquidacion[]
@@ -117,22 +120,23 @@ model Cargo {
 }
 
 model Tarifa {
-  id                  Int      @id @default(autoincrement())
+  id                  Int              @id @default(autoincrement())
   empresaId           Int
   sucursalId          Int
   cargoId             Int
-  bonoAsistencia      Float    @default(0)
-  bonoColacion        Float    @default(0)
-  bonoNoche           Float    @default(0)
-  otrosBonos          Float    @default(0)
-  sueldoBase          Float    @default(0)
-  valorHoraExtra      Float    @default(0)
-  bonoCaja            Float    @default(0)
-  bonoMovilizacion    Float    @default(0)
-  bonoResponsabilidad Float    @default(0)
-  Cargo               Cargo    @relation(fields: [cargoId], references: [id])
-  Empresa             Empresa  @relation(fields: [empresaId], references: [id], onDelete: Cascade)
-  Sucursal            Sucursal @relation(fields: [sucursalId], references: [id], onDelete: Cascade)
+  bonoAsistencia      Float            @default(0)
+  bonoColacion        Float            @default(0)
+  bonoNoche           Float            @default(0)
+  otrosBonos          Float            @default(0)
+  sueldoBase          Float            @default(0)
+  valorHoraExtra      Float            @default(0)
+  bonoCaja            Float            @default(0)
+  bonoMovilizacion    Float            @default(0)
+  bonoResponsabilidad Float            @default(0)
+  CotizacionItem      CotizacionItem[]
+  Cargo               Cargo            @relation(fields: [cargoId], references: [id])
+  Empresa             Empresa          @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  Sucursal            Sucursal         @relation(fields: [sucursalId], references: [id], onDelete: Cascade)
 
   @@unique([empresaId, sucursalId, cargoId])
 }
@@ -153,20 +157,22 @@ model Trabajador {
 }
 
 model Usuario {
-  id                                    Int                                 @id @default(autoincrement())
-  nombre                                String
-  email                                 String                              @unique
-  password                              String
-  rol                                   String                              @default("ADMIN")
-  ArchivoDocumentacionReclutamiento     ArchivoDocumentacionReclutamiento[] @ignore
-  PropuestasComercialesEnviadas         DatosEtapaPropuestaComercial[]      @relation("ResponsableEnvioPropuestaComercial")
-  MovimientosOportunidadComercial       HistorialOportunidadComercial[]
-  OportunidadesComercialesCreadas       OportunidadComercial[]              @relation("CreadorOportunidadComercial")
-  OportunidadesComercialesComoEjecutivo OportunidadComercial[]              @relation("EjecutivoOportunidadComercial")
-  OportunidadesEntrevista               OportunidadEntrevista[]             @relation("ResponsableEntrevista")
-  MovimientosOportunidad                OportunidadHistorial[]
-  OportunidadesActualizadas             OportunidadReclutamiento[]          @relation("ActualizadoPorEtapaNuevos")
-  OportunidadesComoReclutador           OportunidadReclutamiento[]          @relation("ReclutadorResponsable")
+  id                                           Int                                 @id @default(autoincrement())
+  nombre                                       String
+  email                                        String                              @unique
+  password                                     String
+  rol                                          String                              @default("ADMIN")
+  ArchivoDocumentacionReclutamiento            ArchivoDocumentacionReclutamiento[] @ignore
+  Cotizacion_Cotizacion_ejecutivoIdToUsuario   Cotizacion[]                        @relation("Cotizacion_ejecutivoIdToUsuario")
+  Cotizacion_Cotizacion_responsableIdToUsuario Cotizacion[]                        @relation("Cotizacion_responsableIdToUsuario")
+  PropuestasComercialesEnviadas                DatosEtapaPropuestaComercial[]      @relation("ResponsableEnvioPropuestaComercial")
+  MovimientosOportunidadComercial              HistorialOportunidadComercial[]
+  OportunidadesComercialesCreadas              OportunidadComercial[]              @relation("CreadorOportunidadComercial")
+  OportunidadesComercialesComoEjecutivo        OportunidadComercial[]              @relation("EjecutivoOportunidadComercial")
+  OportunidadesEntrevista                      OportunidadEntrevista[]             @relation("ResponsableEntrevista")
+  MovimientosOportunidad                       OportunidadHistorial[]
+  OportunidadesActualizadas                    OportunidadReclutamiento[]          @relation("ActualizadoPorEtapaNuevos")
+  OportunidadesComoReclutador                  OportunidadReclutamiento[]          @relation("ReclutadorResponsable")
 }
 
 model IncidenciaAsistencia {
@@ -318,6 +324,111 @@ model Empleo {
   postulaciones            Postulacion[]
 
   @@map("empleos")
+}
+
+// Logos del carrusel "Marcas que confían en nuestro trabajo" de la página pública.
+model MarcaWeb {
+  id           Int      @id @default(autoincrement())
+  nombre       String
+  logoUrl      String
+  logoPublicId String?
+  orden        Int      @default(0)
+  activo       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("marcas_web")
+}
+
+// Interruptores y ajustes simples de la página pública, administrados desde la
+// intranet (Marketing → Herramientas). Ej: "blogVisible".
+model AjusteWeb {
+  clave     String   @id
+  valor     Json
+  updatedAt DateTime @updatedAt
+
+  @@map("ajustes_web")
+}
+
+// Áreas (tarjetas) de la sección "Nuestro equipo" en Nosotros de la página pública.
+model AreaEquipoWeb {
+  id          Int                @id @default(autoincrement())
+  nombre      String
+  descripcion String?
+  orden       Int                @default(0)
+  activo      Boolean            @default(true)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  miembros    MiembroEquipoWeb[]
+
+  @@map("areas_equipo_web")
+}
+
+// Personas de cada área de "Nuestro equipo".
+model MiembroEquipoWeb {
+  id                Int               @id @default(autoincrement())
+  nombre            String
+  cargo             String
+  areaId            Int?
+  resumen           String?
+  fotoUrl           String?
+  fotoPublicId      String?
+  linkedinUrl       String?
+  orden             Int               @default(0)
+  activo            Boolean           @default(true)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  area              AreaEquipoWeb?    @relation(fields: [areaId], references: [id], onDelete: SetNull)
+  publicacionesBlog PublicacionBlog[]
+
+  @@index([areaId])
+  @@map("miembros_equipo_web")
+}
+
+// Categorías del blog de la página pública (filtros y etiqueta de cada artículo).
+model CategoriaBlog {
+  id            Int               @id @default(autoincrement())
+  nombre        String
+  slug          String            @unique
+  orden         Int               @default(0)
+  activo        Boolean           @default(true)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  publicaciones PublicacionBlog[]
+
+  @@map("categorias_blog")
+}
+
+// Artículos del blog. `contenido` es una lista de bloques (párrafo, subtítulo,
+// lista, dato clave, imagen); ver src/controllers/publicacionBlog.controller.ts.
+model PublicacionBlog {
+  id               Int               @id @default(autoincrement())
+  titulo           String
+  slug             String            @unique
+  resumen          String
+  categoriaId      Int
+  autorMiembroId   Int?
+  autorNombre      String?
+  portadaUrl       String?
+  portadaPublicId  String?
+  portadaAlt       String?
+  contenido        Json
+  etiquetas        String[]          @default([])
+  minutosLectura   Int               @default(1)
+  // Título y descripción para Google; si están vacíos se usan titulo y resumen.
+  seoTitulo        String?
+  seoDescripcion   String?
+  publicado        Boolean           @default(false)
+  fechaPublicacion DateTime?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  categoria        CategoriaBlog     @relation(fields: [categoriaId], references: [id])
+  autorMiembro     MiembroEquipoWeb? @relation(fields: [autorMiembroId], references: [id], onDelete: SetNull)
+
+  @@index([categoriaId])
+  @@index([autorMiembroId])
+  @@index([publicado, fechaPublicacion])
+  @@map("publicaciones_blog")
 }
 
 model OportunidadReclutamiento {
@@ -583,6 +694,8 @@ model OportunidadComercial {
   motivoPostergacion    String?
   perdida               Boolean                         @default(false)
   postergada            Boolean                         @default(false)
+  holdingId             Int?
+  Cotizacion            Cotizacion?
   DatosCierreGanada     DatosCierreGanadaComercial?
   DatosContactado       DatosEtapaContactadoComercial?
   DatosNegociacion      DatosEtapaNegociacionComercial?
@@ -592,12 +705,14 @@ model OportunidadComercial {
   CreadoPor             Usuario                         @relation("CreadorOportunidadComercial", fields: [createdById], references: [id])
   Ejecutivo             Usuario                         @relation("EjecutivoOportunidadComercial", fields: [ejecutivoId], references: [id])
   Empresa               Empresa?                        @relation(fields: [empresaId], references: [id])
+  Holding               Holding?                        @relation(fields: [holdingId], references: [id])
 
   @@index([empresaId])
   @@index([ejecutivoId])
   @@index([createdById])
   @@index([etapa])
   @@index([prioridad])
+  @@index([holdingId])
 }
 
 model HistorialOportunidadComercial {
@@ -711,6 +826,100 @@ model DatosCierreGanadaComercial {
   @@index([oportunidadReclutamientoId])
 }
 
+model Cotizacion {
+  id                                        Int                   @id @default(autoincrement())
+  oportunidadId                             Int?                  @unique
+  margenPorcentaje                          Float?
+  totalCotizado                             Float                 @default(0)
+  observaciones                             String?
+  createdAt                                 DateTime              @default(now())
+  updatedAt                                 DateTime
+  aplicaIVA                                 Boolean               @default(true)
+  cantidadTrabajadoresEstimada              Int?
+  clienteProspectoNombre                    String?
+  clienteProspectoRut                       String?
+  contactoCargo                             String?
+  contactoEmail                             String?
+  contactoNombre                            String?
+  contactoTelefono                          String?
+  descuentoGlobal                           Float                 @default(0)
+  descuentoMonto                            Float                 @default(0)
+  ejecutivoId                               Int?
+  empresaId                                 Int?
+  estado                                    EstadoCotizacion      @default(BORRADOR)
+  fechaCotizacion                           DateTime?
+  iva                                       Float                 @default(0)
+  moneda                                    MonedaCotizacion      @default(CLP)
+  neto                                      Float                 @default(0)
+  nombreCotizacion                          String?
+  numero                                    Int?                  @unique
+  responsableId                             Int?
+  subtotalComercial                         Float                 @default(0)
+  tipoServicio                              String?
+  tipoServicioOtro                          String?
+  totalComercial                            Float                 @default(0)
+  vigencia                                  DateTime?
+  Usuario_Cotizacion_ejecutivoIdToUsuario   Usuario?              @relation("Cotizacion_ejecutivoIdToUsuario", fields: [ejecutivoId], references: [id])
+  Empresa                                   Empresa?              @relation(fields: [empresaId], references: [id])
+  OportunidadComercial                      OportunidadComercial? @relation(fields: [oportunidadId], references: [id], onDelete: Cascade)
+  Usuario_Cotizacion_responsableIdToUsuario Usuario?              @relation("Cotizacion_responsableIdToUsuario", fields: [responsableId], references: [id])
+  CotizacionItem                            CotizacionItem[]
+  CotizacionLinea                           CotizacionLinea[]
+
+  @@index([ejecutivoId])
+  @@index([empresaId])
+  @@index([estado])
+  @@index([numero])
+  @@index([oportunidadId])
+  @@index([responsableId])
+}
+
+model CotizacionItem {
+  id                   Int        @id @default(autoincrement())
+  cotizacionId         Int
+  cargoId              Int
+  cargoNombre          String
+  tarifaId             Int?
+  cantidadTrabajadores Int
+  sueldoBase           Float      @default(0)
+  bonoAsistencia       Float      @default(0)
+  bonoCaja             Float      @default(0)
+  bonoColacion         Float      @default(0)
+  bonoMovilizacion     Float      @default(0)
+  bonoNoche            Float      @default(0)
+  bonoResponsabilidad  Float      @default(0)
+  otrosBonos           Float      @default(0)
+  valorHoraExtra       Float      @default(0)
+  costoUnitario        Float      @default(0)
+  costoTotal           Float      @default(0)
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime
+  Cargo                Cargo      @relation(fields: [cargoId], references: [id])
+  Cotizacion           Cotizacion @relation(fields: [cotizacionId], references: [id], onDelete: Cascade)
+  Tarifa               Tarifa?    @relation(fields: [tarifaId], references: [id])
+
+  @@index([cargoId])
+  @@index([cotizacionId])
+  @@index([tarifaId])
+}
+
+model CotizacionLinea {
+  id             Int                @id @default(autoincrement())
+  cotizacionId   Int
+  tipoLinea      TipoLineaComercial
+  descripcion    String
+  cantidad       Float
+  precioUnitario Float
+  margenPct      Float              @default(0)
+  subtotal       Float              @default(0)
+  orden          Int                @default(0)
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime
+  Cotizacion     Cotizacion         @relation(fields: [cotizacionId], references: [id], onDelete: Cascade)
+
+  @@index([cotizacionId])
+}
+
 enum TipoMovimientoOportunidad {
   CREACION
   EDICION_GENERAL
@@ -814,6 +1023,7 @@ enum TipoMovimientoOportunidadComercial {
   CIERRE_GANADA
   MARCADA_PERDIDA
   POSTERGADA
+  EDICION_COTIZACION
 }
 
 enum OrigenProspectoComercial {
@@ -865,4 +1075,23 @@ enum NecesidadActivaComercial {
   SI
   NO
   A_FUTURO
+}
+
+enum EstadoCotizacion {
+  BORRADOR
+  ENVIADA
+  ACEPTADA
+  RECHAZADA
+  VENCIDA
+}
+
+enum MonedaCotizacion {
+  CLP
+  USD
+  UF
+}
+
+enum TipoLineaComercial {
+  SERVICIO
+  MANUAL
 }

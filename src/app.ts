@@ -18,6 +18,10 @@ import postulacionRoutes from "./routes/postulacion.routes";
 import empleoRoutes from "./routes/empleo.routes";
 import talanaRoutes from "./routes/talana.routes";
 import oportunidadRoutes from "./routes/oportunidad.routes";
+import marcaWebRoutes from "./routes/marcaWeb.routes";
+import equipoWebRoutes from "./routes/equipoWeb.routes";
+import ajusteWebRoutes from "./routes/ajusteWeb.routes";
+import blogRoutes from "./routes/blog.routes";
 import dashboardRoutes from "./routes/dashboard.routes";
 import oportunidadComercialRoutes from "./routes/oportunidadComercial.routes";
 import contactoRoutes from "./routes/contacto.routes";
@@ -120,6 +124,10 @@ app.use("/api/oportunidades", oportunidadRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/oportunidades-comerciales", oportunidadComercialRoutes);
 app.use("/api/contacto", contactoRoutes);
+app.use("/api/marcas-web", marcaWebRoutes);
+app.use("/api/equipo-web", equipoWebRoutes);
+app.use("/api/ajustes-web", ajusteWebRoutes);
+app.use("/api/blog", blogRoutes);
 
 // Manejador de rutas inexistentes.
 // Siempre debe permanecer después de todas las rutas.
