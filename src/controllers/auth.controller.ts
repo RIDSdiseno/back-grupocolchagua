@@ -118,7 +118,7 @@ export const loginMicrosoft = async (req: Request, res: Response) => {
           nombre,
           email: emailNormalizado,
           password: passwordTemporal,
-          rol: "ADMIN",
+          rol: "USUARIO",
         },
       });
     }
