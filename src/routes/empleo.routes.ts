@@ -11,9 +11,15 @@ import {
   eliminarEmpleo,
 } from "../controllers/empleo.controller";
 
+import { verificarToken } from "../middlewares/auth.middleware";
+
 const router = Router();
 
 router.get("/publicos", listarEmpleosPublicos);
+
+// Desde aquí, solo administradores.
+router.use(verificarToken);
+
 router.get("/", listarEmpleos);
 router.get("/:id", obtenerEmpleo);
 router.post("/", crearEmpleo);

@@ -8,7 +8,12 @@ import {
   eliminarPreLiquidacion,
 } from "../controllers/preliquidaciones.controller";
 
+import { verificarToken } from "../middlewares/auth.middleware";
+
 const router = Router();
+
+// Todas las rutas requieren sesión de administrador.
+router.use(verificarToken);
 
 router.get("/", listarPreLiquidaciones);
 router.get("/:id", obtenerPreLiquidacion);

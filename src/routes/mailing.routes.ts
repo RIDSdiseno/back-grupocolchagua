@@ -7,7 +7,12 @@ import {
 } from "../controllers/mailing.controller";
 import { uploadMailing } from "../middlewares/upload.middleware";
 
+import { verificarToken } from "../middlewares/auth.middleware";
+
 const router = Router();
+
+// Todas las rutas requieren sesión de administrador.
+router.use(verificarToken);
 
 router.get("/", listarCampanas);
 

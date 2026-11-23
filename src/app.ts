@@ -1,30 +1,33 @@
 import express from "express";
 import cors from "cors";
 
-import authRoutes from "./routes/auth.routes";
-import empresaRoutes from "./routes/empresa.routes";
-import cargoRoutes from "./routes/cargo.routes";
-import tarifaRoutes from "./routes/tarifa.routes";
-import sucursalRoutes from "./routes/sucursal.routes";
-import trabajadorRoutes from "./routes/trabajador.routes";
-import asignacionRoutes from "./routes/asignacion.routes";
-import asistenciaRoutes from "./routes/asistencia.routes";
-import holdingRoutes from "./routes/Holding.routes";
-import usuarioRoutes from "./routes/Usuario.routes";
-import mailingRoutes from "./routes/mailing.routes";
-import incidenciasRoutes from "./routes/incidencias.routes";
-import preliquidacionesRoutes from "./routes/preliquidaciones.routes";
-import postulacionRoutes from "./routes/postulacion.routes";
-import empleoRoutes from "./routes/empleo.routes";
-import talanaRoutes from "./routes/talana.routes";
-import oportunidadRoutes from "./routes/oportunidad.routes";
-import marcaWebRoutes from "./routes/marcaWeb.routes";
-import equipoWebRoutes from "./routes/equipoWeb.routes";
-import ajusteWebRoutes from "./routes/ajusteWeb.routes";
-import blogRoutes from "./routes/blog.routes";
-import dashboardRoutes from "./routes/dashboard.routes";
-import oportunidadComercialRoutes from "./routes/oportunidadComercial.routes";
-import contactoRoutes from "./routes/contacto.routes";
+import sitioPublicoRoutes from "./routes/sitioPublico.routes";
+
+// Rutas de la intranet: DESACTIVADAS mientras la intranet esté dada de baja.
+// Para reactivar una, descomentar su import aquí y su app.use(...) más abajo.
+// import authRoutes from "./routes/auth.routes";
+// import empresaRoutes from "./routes/empresa.routes";
+// import cargoRoutes from "./routes/cargo.routes";
+// import tarifaRoutes from "./routes/tarifa.routes";
+// import sucursalRoutes from "./routes/sucursal.routes";
+// import trabajadorRoutes from "./routes/trabajador.routes";
+// import asignacionRoutes from "./routes/asignacion.routes";
+// import asistenciaRoutes from "./routes/asistencia.routes";
+// import holdingRoutes from "./routes/Holding.routes";
+// import usuarioRoutes from "./routes/Usuario.routes";
+// import mailingRoutes from "./routes/mailing.routes";
+// import incidenciasRoutes from "./routes/incidencias.routes";
+// import preliquidacionesRoutes from "./routes/preliquidaciones.routes";
+// import postulacionRoutes from "./routes/postulacion.routes";
+// import empleoRoutes from "./routes/empleo.routes";
+// import talanaRoutes from "./routes/talana.routes";
+// import oportunidadRoutes from "./routes/oportunidad.routes";
+// import marcaWebRoutes from "./routes/marcaWeb.routes";
+// import equipoWebRoutes from "./routes/equipoWeb.routes";
+// import ajusteWebRoutes from "./routes/ajusteWeb.routes";
+// import blogRoutes from "./routes/blog.routes";
+// import dashboardRoutes from "./routes/dashboard.routes";
+// import oportunidadComercialRoutes from "./routes/oportunidadComercial.routes";
 
 const app = express();
 
@@ -84,11 +87,12 @@ app.options("/{*path}", cors(corsOptions));
 // CORS para todas las rutas.
 app.use(cors(corsOptions));
 
-app.use(express.json({ limit: "60mb" }));
+// Los formularios públicos son pequeños; el CV llega por multer (máx. 5 MB).
+app.use(express.json({ limit: "1mb" }));
 app.use(
   express.urlencoded({
     extended: true,
-    limit: "60mb",
+    limit: "1mb",
   }),
 );
 
@@ -103,31 +107,35 @@ app.get("/health", (_req, res) => {
   res.status(200).send("ok");
 });
 
-// Rutas API.
-app.use("/api/auth", authRoutes);
-app.use("/api/empresas", empresaRoutes);
-app.use("/api/cargos", cargoRoutes);
-app.use("/api/tarifas", tarifaRoutes);
-app.use("/api/sucursales", sucursalRoutes);
-app.use("/api/trabajadores", trabajadorRoutes);
-app.use("/api/asignaciones", asignacionRoutes);
-app.use("/api/asistencia", asistenciaRoutes);
-app.use("/api/holdings", holdingRoutes);
-app.use("/api/usuarios", usuarioRoutes);
-app.use("/api/mailing", mailingRoutes);
-app.use("/api/incidencias", incidenciasRoutes);
-app.use("/api/preliquidaciones", preliquidacionesRoutes);
-app.use("/api/postulaciones", postulacionRoutes);
-app.use("/api/empleos", empleoRoutes);
-app.use("/api/talana", talanaRoutes);
-app.use("/api/oportunidades", oportunidadRoutes);
-app.use("/api/dashboard", dashboardRoutes);
-app.use("/api/oportunidades-comerciales", oportunidadComercialRoutes);
-app.use("/api/contacto", contactoRoutes);
-app.use("/api/marcas-web", marcaWebRoutes);
-app.use("/api/equipo-web", equipoWebRoutes);
-app.use("/api/ajustes-web", ajusteWebRoutes);
-app.use("/api/blog", blogRoutes);
+// Rutas API activas: solo las que usa el sitio público grupocolchagua.cl.
+app.use("/api", sitioPublicoRoutes);
+
+// Rutas de la intranet: DESACTIVADAS (ver imports arriba). Sus rutas de
+// administración piden sesión con verificarToken. Contacto no está en esta
+// lista porque ya lo atiende sitioPublicoRoutes.
+// app.use("/api/auth", authRoutes);
+// app.use("/api/empresas", empresaRoutes);
+// app.use("/api/cargos", cargoRoutes);
+// app.use("/api/tarifas", tarifaRoutes);
+// app.use("/api/sucursales", sucursalRoutes);
+// app.use("/api/trabajadores", trabajadorRoutes);
+// app.use("/api/asignaciones", asignacionRoutes);
+// app.use("/api/asistencia", asistenciaRoutes);
+// app.use("/api/holdings", holdingRoutes);
+// app.use("/api/usuarios", usuarioRoutes);
+// app.use("/api/mailing", mailingRoutes);
+// app.use("/api/incidencias", incidenciasRoutes);
+// app.use("/api/preliquidaciones", preliquidacionesRoutes);
+// app.use("/api/postulaciones", postulacionRoutes);
+// app.use("/api/empleos", empleoRoutes);
+// app.use("/api/talana", talanaRoutes);
+// app.use("/api/oportunidades", oportunidadRoutes);
+// app.use("/api/dashboard", dashboardRoutes);
+// app.use("/api/oportunidades-comerciales", oportunidadComercialRoutes);
+// app.use("/api/marcas-web", marcaWebRoutes);
+// app.use("/api/equipo-web", equipoWebRoutes);
+// app.use("/api/ajustes-web", ajusteWebRoutes);
+// app.use("/api/blog", blogRoutes);
 
 // Manejador de rutas inexistentes.
 // Siempre debe permanecer después de todas las rutas.

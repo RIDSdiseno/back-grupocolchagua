@@ -14,7 +14,7 @@ const router = Router();
 router.get("/", verificarToken, listarAsistencia);
 router.get("/resumen", verificarToken, resumenAsistencia);
 router.post("/", verificarToken, registrarAsistencia);
-router.post("/bulk", registrarAsistenciaMasiva);
+router.post("/bulk", verificarToken, registrarAsistenciaMasiva);
 router.put("/:id", verificarToken, actualizarAsistencia);
 router.delete("/:id", verificarToken, eliminarAsistencia);
 

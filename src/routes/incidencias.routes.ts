@@ -7,7 +7,12 @@ import {
   resumenIncidencias,
 } from "../controllers/incidencias.controller";
 
+import { verificarToken } from "../middlewares/auth.middleware";
+
 const router = Router();
+
+// Todas las rutas requieren sesión de administrador.
+router.use(verificarToken);
 
 router.get("/", listarIncidencias);
 router.get("/resumen", resumenIncidencias);

@@ -42,3 +42,12 @@ export const buscarSlugLibre = async (
 
   return slug;
 };
+
+// Escapa texto ingresado por usuarios antes de insertarlo en HTML (correos).
+export const escaparHtml = (valor: unknown): string =>
+  String(valor ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
